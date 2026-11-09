@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/plugin-browser" },
+    { "path": "packages/plugin-storage" },
+    { "path": "packages/plugin-ui-layout" }
+  ]
+}

@@ -10,9 +10,11 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "clean": "rm -rf dist"
+    "build": "tsc -b",
+    "typecheck": "tsc -b",
+    "clean": "rm -rf dist",
+    "dev": "tsc -b -w & node --watch dist/core/main.js",
+    "start": "node dist/core/main.js"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

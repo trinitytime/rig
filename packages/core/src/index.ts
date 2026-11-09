@@ -1,12 +1,7 @@
-/** Rig kernel entry. Keep this minimal: lifecycle, RPC/event bus, service registry, server. */
-export const RIG_API_VERSION = 1;
-
-export interface PluginManifest {
-  name: string;
-  apiVersion: number;
-  backend?: string;
-  ui?: { entry: string; slot: string };
-  requires?: string[];
-  permissions?: string[];
-}
+export * from "./manifest.js";
+export * from "./plugin.js";
+export * from "./services.js";
+export * from "./paths.js";
+export * from "./discovery.js";
+export * from "./loader.js";
 export * from "./server.js";
