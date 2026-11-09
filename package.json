@@ -1,0 +1,21 @@
+{
+  "name": "rig-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Rig: an empty JS plugin host (kernel + backend/frontend plugins)",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
+}

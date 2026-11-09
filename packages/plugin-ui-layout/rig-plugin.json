@@ -1,0 +1,7 @@
+{
+  "name": "ui-layout",
+  "apiVersion": 1,
+  "backend": "dist/index.js",
+  "requires": [],
+  "permissions": []
+}

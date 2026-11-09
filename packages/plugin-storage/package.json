@@ -1,0 +1,15 @@
+{
+  "name": "@rig/plugin-storage",
+  "version": "0.0.0",
+  "description": "Rig service plugin: key-value storage (storage)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist"
+  }
+}
