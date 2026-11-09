@@ -17,8 +17,8 @@
     "start": "node dist/core/main.js"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.6.0"
+    "@types/node": "^24.19.2",
+    "typescript": "^7.0.2"
   },
   "type": "module"
 }
