@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "outDir": "dist", "rootDir": "src" },
+  "compilerOptions": { "outDir": "../../dist/plugin-ui-layout", "rootDir": "src" },
   "include": ["src"]
 }

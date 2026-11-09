@@ -1,7 +1,7 @@
 {
   "name": "storage",
   "apiVersion": 1,
-  "backend": "dist/index.js",
+  "backend": "index.js",
   "requires": [],
   "permissions": []
 }

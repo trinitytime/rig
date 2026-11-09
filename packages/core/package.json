@@ -3,19 +3,16 @@
   "version": "0.0.0",
   "description": "Rig kernel: plugin lifecycle, RPC/event bus, service registry, localhost server",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "main": "../../dist/core/index.js",
+  "types": "../../dist/core/index.d.ts",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "clean": "rm -rf dist",
-    "start": "node dist/main.js"
+    "clean": "rm -rf ../../dist/core",
+    "start": "node ../../dist/core/main.js"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.6",
