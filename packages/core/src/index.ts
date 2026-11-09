@@ -9,3 +9,4 @@ export interface PluginManifest {
   requires?: string[];
   permissions?: string[];
 }
+export * from "./server.js";
