@@ -1,0 +1,7 @@
+{
+  "name": "@rig/launcher",
+  "version": "0.0.0",
+  "description": "Rig launcher: installs dependencies if needed, then starts core with the bundled bun",
+  "type": "module",
+  "bin": { "rig": "launcher.mjs" }
+}

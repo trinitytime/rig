@@ -14,7 +14,7 @@
     "typecheck": "tsc -b",
     "clean": "rm -rf dist",
     "dev": "tsc -b -w & node --watch dist/core/main.js",
-    "start": "node dist/core/main.js"
+    "start": "node packages/launcher/launcher.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
