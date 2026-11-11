@@ -79,12 +79,21 @@ export class PluginLoader {
     };
     plugins.forEach((p) => visit(p, []));
 
-    for (const [id, error] of failed) {
-      const p = byId.get(id)!;
-      this.statuses.push({ id, name: p.manifest.name, source: p.source, state: "skipped", requires: p.manifest.requires ?? [], error });
+    for (const [id, error] of failed) this.statuses.push(this.skipped(byId.get(id)!, error));
+
+    // 로드에 실패했거나 건너뛴 플러그인에 의존하는 플러그인은 올리지 않는다.
+    const down = new Set(failed.keys());
+    for (const p of sorted) {
+      const dead = (p.manifest.requires ?? []).find((dep) => down.has(dep));
+      const status = dead ? this.skipped(p, `required plugin "${dead}" unavailable`) : await this.activate(p);
+      if (status.state !== "active") down.add(p.manifest.id);
+      this.statuses.push(status);
     }
-    for (const p of sorted) this.statuses.push(await this.activate(p));
     return this.statuses;
+  }
+
+  private skipped(p: DiscoveredPlugin, error: string): PluginStatus {
+    return { id: p.manifest.id, name: p.manifest.name, source: p.source, state: "skipped", requires: p.manifest.requires ?? [], error };
   }
 
   private async activate(p: DiscoveredPlugin): Promise<PluginStatus> {
