@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { serve, type ServerType } from "@hono/node-server";
+import { serve } from "@hono/node-server";
 import type { PluginLoader } from "./loader.js";
 
 /** 기본 포트. 전화 키패드로 R-I-G = 7-4-4 (+0). 흔한 개발 포트(3000/5173/8080)와 겹치지 않음. */
@@ -22,11 +22,24 @@ export interface StartServerOptions {
   host?: string;
 }
 
-export function startServer(opts: StartServerOptions = {}): ServerType {
+/** Bun 런타임 전역(bun-types 없이 쓰는 최소 선언). */
+declare const Bun: {
+  serve(o: { fetch: (r: Request) => Response | Promise<Response>; port: number; hostname: string }): {
+    port: number;
+    stop(): void;
+  };
+};
+
+export function startServer(opts: StartServerOptions = {}): { close(): void } {
   const port = opts.port ?? Number(process.env.RIG_PORT ?? DEFAULT_PORT);
   const hostname = opts.host ?? DEFAULT_HOST;
-  const server = serve({ fetch: createApp(opts.loader).fetch, port, hostname }, (info) => {
-    console.log(`Rig listening on http://${hostname}:${info.port}`);
-  });
-  return server;
+  const { fetch } = createApp(opts.loader);
+  const log = (p: number) => console.log(`Rig listening on http://${hostname}:${p}`);
+
+  if (typeof (globalThis as { Bun?: unknown }).Bun !== "undefined") {
+    const server = Bun.serve({ fetch, port, hostname });
+    log(server.port);
+    return { close: () => server.stop() };
+  }
+  return serve({ fetch, port, hostname }, (info) => log(info.port));
 }
