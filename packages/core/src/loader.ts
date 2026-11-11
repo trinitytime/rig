@@ -3,7 +3,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { discoverPlugins, type DiscoveredPlugin } from "./discovery.js";
 import { rigHome } from "./paths.js";
-import type { PluginContext, PluginLogger, RigPlugin } from "./plugin.js";
+import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./plugin.js";
 import { Ownership } from "./ownership.js";
 import { ServiceRegistry } from "./services.js";
 
@@ -22,7 +22,7 @@ export class PluginLoader {
   readonly services = new ServiceRegistry();
   private owned = new Ownership();
   private statuses: PluginStatus[] = [];
-  private active = new Map<string, RigPlugin>();
+  private cleanups = new Map<string, PluginCleanup | undefined>();
   private order: string[] = [];
 
   list(): PluginStatus[] {
@@ -83,8 +83,8 @@ export class PluginLoader {
     try {
       if (!fs.existsSync(p.entry)) throw new Error(`backend not built: ${p.entry}`);
       const mod = await import(pathToFileURL(p.entry).href);
-      const plugin: RigPlugin = mod.default ?? mod;
-      if (typeof plugin?.activate !== "function") throw new Error("backend must default-export { activate }");
+      const plugin: RigPlugin = mod.default;
+      if (typeof plugin !== "function") throw new Error("backend must default-export a function (ctx) => ...");
 
       const tag = `[${name}]`;
       const log: PluginLogger = {
@@ -108,8 +108,8 @@ export class PluginLoader {
         }),
       });
       this.owned.open(name);
-      await plugin.activate(ctx);
-      this.active.set(name, plugin);
+      const cleanup = await plugin(ctx);
+      this.cleanups.set(name, typeof cleanup === "function" ? cleanup : undefined);
       this.order.push(name);
     } catch (e) {
       this.owned.release(name);
@@ -124,13 +124,13 @@ export class PluginLoader {
   async unloadAll(): Promise<void> {
     for (const name of [...this.order].reverse()) {
       try {
-        await this.active.get(name)?.deactivate?.();
+        await this.cleanups.get(name)?.();
       } catch (e) {
         console.error(`[rig] plugin "${name}" deactivate failed:`, e);
       }
       this.owned.release(name);
     }
-    this.active.clear();
+    this.cleanups.clear();
     this.order = [];
   }
 }

@@ -16,10 +16,10 @@ export interface PluginContext {
   };
 }
 
-/** 백엔드 모듈이 default export로 내보내야 하는 형태. */
-export interface RigPlugin {
-  activate(ctx: PluginContext): void | Promise<void>;
-  deactivate?(): void | Promise<void>;
-}
+/** 정리 함수. ctx로 등록한 것은 코어가 알아서 해제하므로, 그 밖의 외부 자원을 닫을 때만 필요하다. */
+export type PluginCleanup = () => void | Promise<void>;
+
+/** 백엔드 모듈이 default export로 내보내야 하는 함수. 정리 함수를 반환할 수 있다. */
+export type RigPlugin = (ctx: PluginContext) => void | PluginCleanup | Promise<void | PluginCleanup>;
 
 export const definePlugin = (p: RigPlugin): RigPlugin => p;
