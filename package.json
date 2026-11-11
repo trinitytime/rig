@@ -12,6 +12,7 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b",
+    "test": "bun test",
     "clean": "rm -rf dist",
     "dev": "tsc -b -w & node --watch dist/core/main.js",
     "start": "node packages/launcher/launcher.mjs"

@@ -5,7 +5,6 @@ export interface PluginLogger {
 }
 
 export interface PluginContext {
-  name: string;
   log: PluginLogger;
   /** 사용자 데이터 폴더 아래 이 플러그인 전용 폴더 경로. */
   dataDir: string;

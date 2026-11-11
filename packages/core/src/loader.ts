@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import { discoverPlugins, type DiscoveredPlugin } from "./discovery.js";
 import { rigHome } from "./paths.js";
 import type { PluginContext, PluginLogger, RigPlugin } from "./plugin.js";
+import { Ownership } from "./ownership.js";
 import { ServiceRegistry } from "./services.js";
 
 export type PluginState = "active" | "failed" | "skipped";
@@ -19,6 +20,7 @@ export interface PluginStatus {
 
 export class PluginLoader {
   readonly services = new ServiceRegistry();
+  private owned = new Ownership();
   private statuses: PluginStatus[] = [];
   private active = new Map<string, RigPlugin>();
   private order: string[] = [];
@@ -92,23 +94,25 @@ export class PluginLoader {
       };
       const dataDir = path.join(rigHome(), "data", name);
       fs.mkdirSync(dataDir, { recursive: true });
-      const ctx: PluginContext = {
-        name,
-        log,
+      // id는 클로저로만 존재한다. ctx에는 id를 읽을 수 있는 속성이 없다.
+      const track = (dispose: () => void) => this.owned.track(name, dispose);
+      const ctx: PluginContext = Object.freeze({
+        log: Object.freeze(log),
         dataDir,
-        services: {
-          provide: (impl) => this.services.provide(name, name, impl),
-          get: (svc) => {
+        services: Object.freeze({
+          provide: (impl: unknown) => void track(this.services.provide(name, name, impl)),
+          get: <T = unknown>(svc: string) => {
             if (!requires.includes(svc)) throw new Error(`"${name}" did not declare "${svc}" in requires`);
-            return this.services.get(svc);
+            return this.services.get<T>(svc);
           },
-        },
-      };
+        }),
+      });
+      this.owned.open(name);
       await plugin.activate(ctx);
       this.active.set(name, plugin);
       this.order.push(name);
     } catch (e) {
-      this.services.removeOwner(name);
+      this.owned.release(name);
       status.state = "failed";
       status.error = e instanceof Error ? e.message : String(e);
       console.error(`[rig] plugin "${name}" failed:`, status.error);
@@ -124,7 +128,7 @@ export class PluginLoader {
       } catch (e) {
         console.error(`[rig] plugin "${name}" deactivate failed:`, e);
       }
-      this.services.removeOwner(name);
+      this.owned.release(name);
     }
     this.active.clear();
     this.order = [];
