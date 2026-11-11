@@ -7,13 +7,19 @@ export const pluginIdSchema = z
   .string()
   .regex(/^[A-Za-z0-9_-]{1,64}$/, "must be 1-64 chars of letters, digits, '-' or '_'");
 
+/** 플러그인 폴더 안을 가리키는 상대경로. 절대경로와 `..`는 거부한다 (매니페스트는 외부 입력이다). */
+const entrySchema = z
+  .string()
+  .min(1)
+  .refine((p) => !/^([A-Za-z]:|[\\/])/.test(p) && !p.split(/[\\/]/).includes(".."), "must be a relative path inside the plugin folder");
+
 const manifestSchema = z.object({
   id: pluginIdSchema,
   /** 표시용 이름. 자유롭게 쓸 수 있다. */
   name: z.string().min(1),
   apiVersion: z.literal(RIG_API_VERSION, { error: `unsupported apiVersion (host supports ${RIG_API_VERSION})` }),
-  /** 백엔드 엔트리. 플러그인의 빌드 출력 폴더 기준 상대경로. */
-  backend: z.string().optional(),
+  /** 백엔드 엔트리 파일(.ts 또는 .js) 하나. manifest.json이 있는 폴더 기준 상대경로. UI 전용 플러그인은 생략한다. */
+  entry: entrySchema.optional(),
   ui: z.object({ entry: z.string(), slot: z.string() }).optional(),
   /** 필요한 플러그인의 id 목록. */
   requires: z.array(pluginIdSchema).optional(),

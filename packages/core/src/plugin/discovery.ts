@@ -21,6 +21,12 @@ function readManifest(dir: string): PluginManifest {
   return parseManifest(JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8")));
 }
 
+/** 심볼릭 링크를 풀어도 file이 root 안에 있는지. */
+function isInside(root: string, file: string): boolean {
+  const rel = path.relative(fs.realpathSync(root), fs.realpathSync(file));
+  return !rel.startsWith("..") && !path.isAbsolute(rel);
+}
+
 function subdirs(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
   return fs
@@ -35,15 +41,16 @@ function subdirs(dir: string): string[] {
 
 /**
  * 플러그인 탐색 (우선순위 순, 같은 name이면 먼저 발견된 것이 우선):
- *  1. <repo>/packages/* — 내장. 백엔드는 <repo>/dist/<폴더>/<backend>
- *  2. <RIG_HOME>/plugins/node_modules/* — npm으로 설치한 플러그인. 백엔드는 패키지 폴더 기준
+ *  1. <repo>/packages/* — 내장
+ *  2. <RIG_HOME>/plugins/node_modules/* — npm으로 설치한 플러그인
+ * 백엔드 엔트리는 manifest의 entry(플러그인 폴더 기준 상대경로)가 가리키는 파일 하나다.
  */
 export function discoverPlugins(): { plugins: DiscoveredPlugin[]; errors: DiscoveryError[] } {
   const plugins: DiscoveredPlugin[] = [];
   const errors: DiscoveryError[] = [];
   const seen = new Set<string>();
 
-  const add = (dir: string, source: DiscoveredPlugin["source"], outDir: string) => {
+  const add = (dir: string, source: DiscoveredPlugin["source"]) => {
     if (!fs.existsSync(path.join(dir, "manifest.json"))) return;
     try {
       const manifest = readManifest(dir);
@@ -52,7 +59,8 @@ export function discoverPlugins(): { plugins: DiscoveredPlugin[]; errors: Discov
         return;
       }
       seen.add(manifest.id);
-      const entry = manifest.backend ? path.resolve(outDir, manifest.backend) : undefined;
+      const entry = manifest.entry ? path.resolve(dir, manifest.entry) : undefined;
+      if (entry && fs.existsSync(entry) && !isInside(dir, entry)) throw new Error("entry must be inside the plugin folder");
       plugins.push({ manifest, dir, entry, source });
     } catch (e) {
       errors.push({ dir, error: e instanceof Error ? e.message : String(e) });
@@ -60,9 +68,9 @@ export function discoverPlugins(): { plugins: DiscoveredPlugin[]; errors: Discov
   };
 
   for (const dir of subdirs(path.join(REPO_ROOT, "packages")))
-    add(dir, "builtin", path.join(REPO_ROOT, "dist", path.basename(dir)));
+    add(dir, "builtin");
 
-  for (const dir of subdirs(path.join(rigHome(), "plugins", "node_modules"))) add(dir, "user", dir);
+  for (const dir of subdirs(path.join(rigHome(), "plugins", "node_modules"))) add(dir, "user");
 
   return { plugins, errors };
 }

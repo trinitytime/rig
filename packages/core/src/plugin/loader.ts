@@ -92,10 +92,10 @@ export class PluginLoader {
     const status: PluginStatus = { id, name: p.manifest.name, source: p.source, state: "active", requires };
     if (!p.entry) return status; // UI 전용 플러그인
     try {
-      if (!fs.existsSync(p.entry)) throw new Error(`backend not built: ${p.entry}`);
+      if (!fs.existsSync(p.entry)) throw new Error(`entry not found: ${p.entry}`);
       const mod = await import(pathToFileURL(p.entry).href);
       const plugin: RigPlugin = mod.default;
-      if (typeof plugin !== "function") throw new Error("backend must default-export a function (ctx) => ...");
+      if (typeof plugin !== "function") throw new Error("entry must default-export a function (ctx) => ...");
 
       const ctx = this.createContext(id, requires);
       this.owned.open(id);

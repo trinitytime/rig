@@ -2,7 +2,7 @@
   "id": "storage",
   "name": "storage",
   "apiVersion": 1,
-  "backend": "index.js",
+  "entry": "src/index.ts",
   "requires": [],
   "permissions": []
 }

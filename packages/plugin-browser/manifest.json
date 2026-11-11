@@ -2,7 +2,7 @@
   "id": "browser",
   "name": "browser",
   "apiVersion": 1,
-  "backend": "index.js",
+  "entry": "src/index.ts",
   "requires": [],
   "permissions": []
 }
