@@ -28,7 +28,7 @@ export class PluginLoader {
   readonly signals = new SignalBus();
   /** 플러그인의 웹 API. 서버가 /api/<id>/* 를 여기로 보낸다. */
   readonly http = new HttpRouter();
-  private shared = new SharedMemory();
+  private shared = new SharedMemory((signal, payload) => this.signals.emit(signal, payload));
   private owned = new Ownership();
   private statuses: PluginStatus[] = [];
   private cleanups = new Map<string, PluginCleanup | undefined>();
