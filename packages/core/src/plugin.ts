@@ -18,18 +18,20 @@ export interface PluginSignal {
   emit(event: string, payload?: unknown): void;
 }
 
+export interface PluginService {
+  /** 이 플러그인의 함수를 등록한다. 외부 이름은 `<내 id>.<name>`. 인자와 반환값은 JSON 값만. 반환값은 등록 해제 함수. */
+  provide(name: string, fn: (...args: any[]) => unknown): () => void;
+  /** 다른 플러그인의 함수를 부른다 (예: "storage.get"). manifest의 requires에 선언한 플러그인만 가능. */
+  call<T = unknown>(target: string, ...args: unknown[]): Promise<T>;
+}
+
 export interface PluginContext {
   log: PluginLogger;
   /** 사용자 데이터 폴더 아래 이 플러그인 전용 폴더 경로. */
   dataDir: string;
   timer: PluginTimer;
   signal: PluginSignal;
-  services: {
-    /** 이 플러그인 이름과 같은 이름의 서비스를 제공한다. */
-    provide(impl: unknown): void;
-    /** manifest의 requires에 선언한 서비스만 가져올 수 있다. */
-    get<T = unknown>(name: string): T;
-  };
+  service: PluginService;
 }
 
 /** 정리 함수. ctx로 등록한 것은 코어가 알아서 해제하므로, 그 밖의 외부 자원을 닫을 때만 필요하다. */

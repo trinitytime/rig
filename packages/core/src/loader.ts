@@ -7,7 +7,7 @@ import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./pl
 import { createSignal, SignalBus } from "./signal.js";
 import { createTimer } from "./timer.js";
 import { Ownership } from "./ownership.js";
-import { ServiceRegistry } from "./services.js";
+import { createService, ServiceRegistry } from "./services.js";
 
 export type PluginState = "active" | "failed" | "skipped";
 
@@ -105,13 +105,7 @@ export class PluginLoader {
         dataDir,
         timer: createTimer(track, log),
         signal: createSignal(this.signals, name, track, log),
-        services: Object.freeze({
-          provide: (impl: unknown) => void track(this.services.provide(name, name, impl)),
-          get: <T = unknown>(svc: string) => {
-            if (!requires.includes(svc)) throw new Error(`"${name}" did not declare "${svc}" in requires`);
-            return this.services.get<T>(svc);
-          },
-        }),
+        service: createService(this.services, name, requires, track),
       });
       this.owned.open(name);
       const cleanup = await plugin(ctx);
