@@ -93,24 +93,7 @@ export class PluginLoader {
       const plugin: RigPlugin = mod.default;
       if (typeof plugin !== "function") throw new Error("backend must default-export a function (ctx) => ...");
 
-      const tag = `[${id}]`;
-      const log: PluginLogger = {
-        info: (...a) => console.log(tag, ...a),
-        warn: (...a) => console.warn(tag, ...a),
-        error: (...a) => console.error(tag, ...a),
-      };
-      const dataDir = path.join(rigHome(), "data", id);
-      fs.mkdirSync(dataDir, { recursive: true });
-      // id는 클로저로만 존재한다. ctx에는 id를 읽을 수 있는 속성이 없다.
-      const track = (dispose: () => void) => this.owned.track(id, dispose);
-      const ctx: PluginContext = Object.freeze({
-        log: Object.freeze(log),
-        dataDir,
-        timer: createTimer(track, log),
-        signal: createSignal(this.signals, id, track, log),
-        http: createHttp(this.http, id, track, log),
-        service: createService(this.services, id, requires, track),
-      });
+      const ctx = this.createContext(id, requires);
       this.owned.open(id);
       const cleanup = await plugin(ctx);
       this.cleanups.set(id, typeof cleanup === "function" ? cleanup : undefined);
@@ -122,6 +105,27 @@ export class PluginLoader {
       console.error(`[rig] plugin "${id}" failed:`, status.error);
     }
     return status;
+  }
+
+  private createContext(id: string, requires: string[]): PluginContext {
+    const tag = `[${id}]`;
+    const log: PluginLogger = {
+      info: (...a) => console.log(tag, ...a),
+      warn: (...a) => console.warn(tag, ...a),
+      error: (...a) => console.error(tag, ...a),
+    };
+    const dataDir = path.join(rigHome(), "data", id);
+    fs.mkdirSync(dataDir, { recursive: true });
+    // id는 클로저로만 존재한다. ctx에는 id를 읽을 수 있는 속성이 없다.
+    const track = (dispose: () => void) => this.owned.track(id, dispose);
+    return Object.freeze({
+      log: Object.freeze(log),
+      dataDir,
+      timer: createTimer(track, log),
+      signal: createSignal(this.signals, id, track, log),
+      http: createHttp(this.http, id, track, log),
+      service: createService(this.services, id, requires, track),
+    });
   }
 
   /** 로드의 역순으로 deactivate. */
