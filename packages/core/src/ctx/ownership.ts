@@ -1,3 +1,6 @@
+/** 등록한 것의 해제 함수를 기록하고, 개별 해제용 함수를 돌려준다. (ctx 안에서 플러그인 id에 묶여 만들어진다) */
+export type Track = (dispose: () => void) => () => void;
+
 /** 플러그인 id별로, ctx를 통해 등록된 것들의 해제 함수를 모아 둔다. */
 export class Ownership {
   private owned = new Map<string, Set<() => void>>();

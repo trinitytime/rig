@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { PluginService } from "../plugin/plugin.ts";
+import type { Track } from "./ownership.ts";
 
 type Fn = (...args: any[]) => unknown;
 
@@ -37,7 +38,7 @@ export function createService(
   registry: ServiceRegistry,
   id: string,
   requires: readonly string[],
-  track: (dispose: () => void) => () => void,
+  track: Track,
 ): PluginService {
   const service: PluginService = {
     provide: (name, fn) => track(registry.provide(id, fnName.parse(name), fn)),

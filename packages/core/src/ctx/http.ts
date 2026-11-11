@@ -1,4 +1,5 @@
 import type { PluginHttp, PluginLogger } from "../plugin/plugin.ts";
+import type { Track } from "./ownership.ts";
 
 type FetchHandler = (req: Request) => Response | Promise<Response>;
 
@@ -50,7 +51,7 @@ export class HttpRouter {
 export function createHttp(
   router: HttpRouter,
   id: string,
-  track: (dispose: () => void) => () => void,
+  track: Track,
   log: PluginLogger,
 ): PluginHttp {
   const http: PluginHttp = { fetch: (fn) => track(router.register(id, fn, log)) };

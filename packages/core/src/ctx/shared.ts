@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { PluginShared } from "../plugin/plugin.ts";
+import type { Track } from "./ownership.ts";
 
 const name = z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/, "must be 1-64 chars of letters, digits, '.', '-' or '_'");
 const json = z.json().optional();
@@ -26,7 +27,7 @@ export class SharedMemory {
   }
 
   /** value가 null/undefined면 삭제로 처리한다. 새 key를 만들면 소유자 정리용 해제 함수를 track으로 기록한다. */
-  set(owner: string, ws: string, key: string, value: unknown, track: (dispose: () => void) => () => void): void {
+  set(owner: string, ws: string, key: string, value: unknown, track: Track): void {
     const cur = this.spaces.get(ws)?.get(key);
     if (cur && cur.owner !== owner) throw new Error(`"${ws}/${key}" is owned by another plugin`);
     if (value === null || value === undefined) return this.remove(ws, key);
@@ -72,7 +73,7 @@ export class SharedMemory {
 export function createShared(
   mem: SharedMemory,
   id: string,
-  track: (dispose: () => void) => () => void,
+  track: Track,
 ): PluginShared {
   const shared: PluginShared = {
     async set(ws, key, value) {

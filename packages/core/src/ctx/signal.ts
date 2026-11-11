@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { PluginLogger, PluginSignal } from "../plugin/plugin.ts";
+import type { Track } from "./ownership.ts";
 
 /** 신호 이름. 접두사 없이 모든 플러그인이 같은 이름 공간을 쓴다 (`shared:<workspace>` 처럼 콜론을 쓸 수 있다). */
 const signalName = z.string().regex(/^[A-Za-z0-9_.:-]{1,128}$/, "must be 1-128 chars of letters, digits, '.', ':', '-' or '_'");
@@ -38,7 +39,7 @@ export class SignalBus {
 /** ctx.signal. 플러그인이 emit한 이름 그대로 모든 구독자에게 전달된다. */
 export function createSignal(
   bus: SignalBus,
-  track: (dispose: () => void) => () => void,
+  track: Track,
   log: PluginLogger,
 ): PluginSignal {
   const signal: PluginSignal = {
