@@ -49,6 +49,14 @@ export interface PluginShared {
   delete(workspace: string, key: string): Promise<void>;
 }
 
+/** 플러그인 전용 폴더의 data.json 하나에 JSON 값 하나를 저장한다. */
+export interface PluginStorage {
+  /** 값(JSON)을 그대로 data.json에 저장한다. 이전 내용은 덮어쓴다. */
+  save(value: unknown): Promise<void>;
+  /** data.json을 읽어서 반환한다. 저장한 적이 없으면 undefined. */
+  load<T = unknown>(): Promise<T | undefined>;
+}
+
 export interface PluginContext {
   log: PluginLogger;
   /** 사용자 데이터 폴더 아래 이 플러그인 전용 폴더 경로. */
@@ -56,6 +64,7 @@ export interface PluginContext {
   timer: PluginTimer;
   signal: PluginSignal;
   http: PluginHttp;
+  storage: PluginStorage;
   shared: PluginShared;
   service: PluginService;
 }

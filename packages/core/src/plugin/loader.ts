@@ -7,6 +7,7 @@ import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./pl
 import { createHttp, HttpRouter } from "../ctx/http.ts";
 import { createSignal, SignalBus } from "../ctx/signal.ts";
 import { createShared, SharedMemory } from "../ctx/shared.ts";
+import { createStorage } from "../ctx/storage.ts";
 import { createTimer } from "../ctx/timer.ts";
 import { Ownership } from "../ctx/ownership.ts";
 import { createService, ServiceRegistry } from "../ctx/services.ts";
@@ -129,6 +130,7 @@ export class PluginLoader {
       signal: createSignal(this.signals, track, log),
       http: createHttp(this.http, id, track, log),
       shared: createShared(this.shared, id, track),
+      storage: createStorage(dataDir),
       service: createService(this.services, id, requires, track),
     });
   }
