@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import { discoverPlugins, type DiscoveredPlugin } from "./discovery.js";
 import { rigHome } from "./paths.js";
 import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./plugin.js";
+import { createTimer } from "./timer.js";
 import { Ownership } from "./ownership.js";
 import { ServiceRegistry } from "./services.js";
 
@@ -99,6 +100,7 @@ export class PluginLoader {
       const ctx: PluginContext = Object.freeze({
         log: Object.freeze(log),
         dataDir,
+        timer: createTimer(track, log),
         services: Object.freeze({
           provide: (impl: unknown) => void track(this.services.provide(name, name, impl)),
           get: <T = unknown>(svc: string) => {

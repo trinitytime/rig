@@ -4,10 +4,18 @@ export interface PluginLogger {
   error(...args: unknown[]): void;
 }
 
+/** 반환값은 취소 함수. 플러그인이 내려가면 남은 타이머는 코어가 모두 취소한다. */
+export interface PluginTimer {
+  setTimeout(fn: () => void | Promise<void>, delay: number): () => void;
+  /** 이전 실행이 끝나지 않았으면 그 주기는 건너뛴다. */
+  setInterval(fn: () => void | Promise<void>, interval: number): () => void;
+}
+
 export interface PluginContext {
   log: PluginLogger;
   /** 사용자 데이터 폴더 아래 이 플러그인 전용 폴더 경로. */
   dataDir: string;
+  timer: PluginTimer;
   services: {
     /** 이 플러그인 이름과 같은 이름의 서비스를 제공한다. */
     provide(impl: unknown): void;
