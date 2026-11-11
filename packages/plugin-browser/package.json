@@ -3,15 +3,8 @@
   "version": "0.0.0",
   "description": "Rig service plugin: hidden-browser automation (browser)",
   "type": "module",
-  "main": "../../dist/plugin-browser/index.js",
-  "types": "../../dist/plugin-browser/index.d.ts",
   "engines": {
     "node": ">=20"
-  },
-  "scripts": {
-    "build": "tsc -b",
-    "typecheck": "tsc -b",
-    "clean": "rm -rf ../../dist/plugin-browser"
   },
   "peerDependencies": {
     "@rig/core": "*"

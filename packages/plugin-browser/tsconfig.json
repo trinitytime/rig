@@ -1,6 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "composite": true, "tsBuildInfoFile": "../../dist/plugin-browser/tsconfig.tsbuildinfo", "outDir": "../../dist/plugin-browser", "rootDir": "src" },
-  "include": ["src"],
-  "references": [{ "path": "../core" }]
-}

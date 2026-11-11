@@ -3,15 +3,8 @@
   "version": "0.0.0",
   "description": "Rig service plugin: shell slots / layout (ui-layout)",
   "type": "module",
-  "main": "../../dist/plugin-ui-layout/index.js",
-  "types": "../../dist/plugin-ui-layout/index.d.ts",
   "engines": {
     "node": ">=20"
-  },
-  "scripts": {
-    "build": "tsc -b",
-    "typecheck": "tsc -b",
-    "clean": "rm -rf ../../dist/plugin-ui-layout"
   },
   "peerDependencies": {
     "@rig/core": "*"

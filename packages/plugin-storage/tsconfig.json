@@ -1,6 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "composite": true, "tsBuildInfoFile": "../../dist/plugin-storage/tsconfig.tsbuildinfo", "outDir": "../../dist/plugin-storage", "rootDir": "src" },
-  "include": ["src"],
-  "references": [{ "path": "../core" }]
-}

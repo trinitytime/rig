@@ -3,15 +3,8 @@
   "version": "0.0.0",
   "description": "Rig service plugin: key-value storage (storage)",
   "type": "module",
-  "main": "../../dist/plugin-storage/index.js",
-  "types": "../../dist/plugin-storage/index.d.ts",
   "engines": {
     "node": ">=20"
-  },
-  "scripts": {
-    "build": "tsc -b",
-    "typecheck": "tsc -b",
-    "clean": "rm -rf ../../dist/plugin-storage"
   },
   "peerDependencies": {
     "@rig/core": "*"

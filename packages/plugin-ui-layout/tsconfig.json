@@ -1,6 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "composite": true, "tsBuildInfoFile": "../../dist/plugin-ui-layout/tsconfig.tsbuildinfo", "outDir": "../../dist/plugin-ui-layout", "rootDir": "src" },
-  "include": ["src"],
-  "references": [{ "path": "../core" }]
-}
