@@ -48,16 +48,28 @@ declare const Bun: {
   };
 };
 
-export function startServer(opts: StartServerOptions = {}): { close(): void } {
+/** 서버가 실제로 요청을 받을 수 있게 된 뒤에 resolve한다. 포트를 열지 못하면 reject한다. */
+export function startServer(opts: StartServerOptions = {}): Promise<{ close(): void }> {
   const port = opts.port ?? resolvePort();
   const hostname = opts.host ?? DEFAULT_HOST;
   const { fetch } = createApp(opts.loader, { port });
   const log = (p: number) => console.log(`Rig listening on http://${hostname}:${p}`);
 
-  if (typeof (globalThis as { Bun?: unknown }).Bun !== "undefined") {
-    const server = Bun.serve({ fetch, port, hostname });
-    log(server.port);
-    return { close: () => server.stop() };
-  }
-  return serve({ fetch, port, hostname }, (info) => log(info.port));
+  return new Promise((resolve, reject) => {
+    if (typeof (globalThis as { Bun?: unknown }).Bun !== "undefined") {
+      try {
+        const server = Bun.serve({ fetch, port, hostname }); // 동기로 바인딩된다
+        log(server.port);
+        resolve({ close: () => server.stop() });
+      } catch (e) {
+        reject(e);
+      }
+      return;
+    }
+    const server = serve({ fetch, port, hostname }, (info) => {
+      log(info.port);
+      resolve(server);
+    });
+    server.once("error", reject);
+  });
 }

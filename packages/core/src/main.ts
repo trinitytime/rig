@@ -2,10 +2,10 @@ import { PluginLoader } from "./plugin/loader.ts";
 import { startServer } from "./server.ts";
 
 const loader = new PluginLoader();
+// 서버가 완전히 뜬 뒤에 플러그인을 로드한다 (로드 중에도 /health 등에 응답하고, 플러그인 API는 로드되는 대로 열린다).
+const server = await startServer({ loader });
 const statuses = await loader.loadAll();
 for (const s of statuses) console.log(`[rig] plugin ${s.id}: ${s.state}${s.error ? ` (${s.error})` : ""}`);
-
-const server = startServer({ loader });
 
 let closing = false;
 const shutdown = async () => {

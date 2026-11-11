@@ -3,7 +3,7 @@ import { createShared, SharedMemory } from "../src/ctx/shared.ts";
 import { SignalBus } from "../src/ctx/signal.ts";
 import { Ownership } from "../src/ctx/ownership.ts";
 import { mergeAllowedHosts } from "../src/security.ts";
-import { createApp, resolvePort } from "../src/server.ts";
+import { createApp, resolvePort, startServer } from "../src/server.ts";
 
 const tick = () => new Promise((r) => setTimeout(r, 5));
 
@@ -94,4 +94,15 @@ test("잘못된 allowedHosts는 무시하고 경고하며, 없거나 올바르�
   expect(mergeAllowedHosts("rig.local", warn)).toEqual(["127.0.0.1", "localhost"]);
   expect(mergeAllowedHosts([1], warn)).toEqual(["127.0.0.1", "localhost"]);
   expect(warned.length).toBe(2);
+});
+
+test("startServer는 요청을 받을 수 있게 된 뒤에 resolve하고, 포트가 사용 중이면 reject한다", async () => {
+  const port = 17440 + Math.floor(Math.random() * 1000);
+  const server = await startServer({ port });
+  try {
+    expect((await fetch(`http://127.0.0.1:${port}/health`)).status).toBe(200); // resolve 직후 바로 응답
+    await expect(startServer({ port })).rejects.toThrow();
+  } finally {
+    server.close();
+  }
 });
