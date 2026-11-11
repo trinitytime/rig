@@ -8,7 +8,6 @@
 packages/
   core/               # 구동부(커널): 플러그인 로드, RPC/이벤트 버스, 서비스 레지스트리, 서버
   plugin-browser/     # `browser` 서비스: 숨은 브라우저 자동화
-  plugin-storage/     # `storage` 서비스
   plugin-ui-layout/   # `ui-layout` 서비스: 셸 슬롯
 ```
 

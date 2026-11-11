@@ -1,8 +1,0 @@
-{
-  "id": "storage",
-  "name": "storage",
-  "apiVersion": 1,
-  "entry": "src/index.ts",
-  "requires": [],
-  "permissions": []
-}
