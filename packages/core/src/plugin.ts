@@ -11,11 +11,19 @@ export interface PluginTimer {
   setInterval(fn: () => void | Promise<void>, interval: number): () => void;
 }
 
+export interface PluginSignal {
+  /** 신호를 구독한다. 이름은 `<발행자 id>:<이벤트>` (예: "storage:changed"). 반환값은 구독 해제 함수. */
+  on(signal: string, fn: (payload: unknown) => void | Promise<void>): () => void;
+  /** 이 플러그인의 이벤트를 발행한다. 이름에는 이벤트만 쓴다 (코어가 `<내 id>:` 를 붙인다). payload는 JSON 값만. */
+  emit(event: string, payload?: unknown): void;
+}
+
 export interface PluginContext {
   log: PluginLogger;
   /** 사용자 데이터 폴더 아래 이 플러그인 전용 폴더 경로. */
   dataDir: string;
   timer: PluginTimer;
+  signal: PluginSignal;
   services: {
     /** 이 플러그인 이름과 같은 이름의 서비스를 제공한다. */
     provide(impl: unknown): void;

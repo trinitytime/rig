@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import { discoverPlugins, type DiscoveredPlugin } from "./discovery.js";
 import { rigHome } from "./paths.js";
 import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./plugin.js";
+import { createSignal, SignalBus } from "./signal.js";
 import { createTimer } from "./timer.js";
 import { Ownership } from "./ownership.js";
 import { ServiceRegistry } from "./services.js";
@@ -21,6 +22,8 @@ export interface PluginStatus {
 
 export class PluginLoader {
   readonly services = new ServiceRegistry();
+  /** 코어가 신호를 보낼 때도 이 버스를 쓴다. */
+  readonly signals = new SignalBus();
   private owned = new Ownership();
   private statuses: PluginStatus[] = [];
   private cleanups = new Map<string, PluginCleanup | undefined>();
@@ -101,6 +104,7 @@ export class PluginLoader {
         log: Object.freeze(log),
         dataDir,
         timer: createTimer(track, log),
+        signal: createSignal(this.signals, name, track, log),
         services: Object.freeze({
           provide: (impl: unknown) => void track(this.services.provide(name, name, impl)),
           get: <T = unknown>(svc: string) => {
