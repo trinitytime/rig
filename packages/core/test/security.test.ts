@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { createShared, SharedMemory } from "../src/ctx/shared.ts";
 import { SignalBus } from "../src/ctx/signal.ts";
 import { Ownership } from "../src/ctx/ownership.ts";
-import { createApp } from "../src/server.ts";
+import { createApp, resolvePort } from "../src/server.ts";
 
 const tick = () => new Promise((r) => setTimeout(r, 5));
 
@@ -76,4 +76,10 @@ test("시작 전에 이미 있는 값은 시작할 때 반영한다", async () =
   await createShared(shared, "p", (d) => o.track("p", d)).set("config", "allowedHosts", ["rig.local"]);
   const app = createApp({ shared, signals } as never, { port: 7440 });
   expect(await status(app, { host: "rig.local:7440" })).toBe(200);
+});
+
+test("RIG_PORT는 1~65535 정수만 허용하고 없으면 기본 포트를 쓴다", () => {
+  expect(resolvePort(undefined)).toBe(7440);
+  expect(resolvePort("8080")).toBe(8080);
+  for (const bad of ["abc", "0", "65536", "1.5", ""]) expect(() => resolvePort(bad)).toThrow("RIG_PORT");
 });

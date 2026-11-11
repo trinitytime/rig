@@ -22,6 +22,10 @@ function run(cmd, args) {
 // (확인과 구동 사이의 경합은 막지 못한다. 마지막 방어선은 core의 포트 바인딩 실패다.)
 async function checkRunning() {
   const port = Number(process.env.RIG_PORT ?? 7440); // core의 DEFAULT_PORT와 같은 값
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    console.error(`RIG_PORT는 1~65535 사이의 정수여야 합니다 ("${process.env.RIG_PORT}").`);
+    process.exit(1);
+  }
   try {
     const res = await fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(1000) });
     const body = await res.json().catch(() => null);
