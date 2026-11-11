@@ -6,6 +6,7 @@ import { rigHome } from "../paths.ts";
 import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./plugin.ts";
 import { createHttp, HttpRouter } from "../ctx/http.ts";
 import { createSignal, SignalBus } from "../ctx/signal.ts";
+import { createShared, SharedMemory } from "../ctx/shared.ts";
 import { createTimer } from "../ctx/timer.ts";
 import { Ownership } from "../ctx/ownership.ts";
 import { createService, ServiceRegistry } from "../ctx/services.ts";
@@ -27,6 +28,7 @@ export class PluginLoader {
   readonly signals = new SignalBus();
   /** 플러그인의 웹 API. 서버가 /api/<id>/* 를 여기로 보낸다. */
   readonly http = new HttpRouter();
+  private shared = new SharedMemory();
   private owned = new Ownership();
   private statuses: PluginStatus[] = [];
   private cleanups = new Map<string, PluginCleanup | undefined>();
@@ -124,6 +126,7 @@ export class PluginLoader {
       timer: createTimer(track, log),
       signal: createSignal(this.signals, id, track, log),
       http: createHttp(this.http, id, track, log),
+      shared: createShared(this.shared, id, track),
       service: createService(this.services, id, requires, track),
     });
   }

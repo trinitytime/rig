@@ -33,6 +33,18 @@ export interface PluginHttp {
   fetch(handler: (req: Request) => Response | Promise<Response>): () => void;
 }
 
+/** 메모리에만 있는 플러그인 간 공유 값. workspace는 처음 쓴 플러그인이 소유하며, 소유자만 쓰고 누구나 읽는다. */
+export interface PluginShared {
+  /** 소유한 workspace에 값을 쓴다 (없으면 만들며 소유자가 된다). 값은 JSON만. */
+  set(workspace: string, key: string, value: unknown): Promise<void>;
+  /** 값을 읽는다. 없으면 undefined. */
+  get<T = unknown>(workspace: string, key: string): Promise<T | undefined>;
+  /** workspace의 모든 key/value를 읽는다. 없으면 {}. */
+  get<T = Record<string, unknown>>(workspace: string): Promise<T>;
+  /** key를 주면 그 값만, 생략하면 workspace 전체를 지운다 (소유자만). */
+  delete(workspace: string, key?: string): Promise<void>;
+}
+
 export interface PluginContext {
   log: PluginLogger;
   /** 사용자 데이터 폴더 아래 이 플러그인 전용 폴더 경로. */
@@ -40,6 +52,7 @@ export interface PluginContext {
   timer: PluginTimer;
   signal: PluginSignal;
   http: PluginHttp;
+  shared: PluginShared;
   service: PluginService;
 }
 
