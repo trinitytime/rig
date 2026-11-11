@@ -124,7 +124,7 @@ export class PluginLoader {
       log: Object.freeze(log),
       dataDir,
       timer: createTimer(track, log),
-      signal: createSignal(this.signals, id, track, log),
+      signal: createSignal(this.signals, track, log),
       http: createHttp(this.http, id, track, log),
       shared: createShared(this.shared, id, track),
       service: createService(this.services, id, requires, track),

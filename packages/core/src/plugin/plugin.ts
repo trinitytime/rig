@@ -12,10 +12,10 @@ export interface PluginTimer {
 }
 
 export interface PluginSignal {
-  /** 신호를 구독한다. 이름은 `<발행자 id>:<이벤트>` (예: "storage:changed"). 반환값은 구독 해제 함수. */
+  /** 신호를 구독한다. 이름은 자유롭게 쓰며, 누가 emit했든 같은 이름이면 전달된다. 반환값은 구독 해제 함수. */
   on(signal: string, fn: (payload: unknown) => void | Promise<void>): () => void;
-  /** 이 플러그인의 이벤트를 발행한다. 이름에는 이벤트만 쓴다 (코어가 `<내 id>:` 를 붙인다). payload는 JSON 값만. */
-  emit(event: string, payload?: unknown): void;
+  /** 신호를 발행한다. payload는 JSON 값만. `shared:` 로 시작하는 이름은 코어 전용이라 쓸 수 없다. */
+  emit(signal: string, payload?: unknown): void;
 }
 
 export interface PluginService {
