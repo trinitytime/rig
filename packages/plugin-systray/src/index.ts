@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { RigPlugin } from "@rig/core";
 import * as mod from "systray2";
 import type SysTrayType from "systray2";
@@ -14,17 +16,10 @@ const isTrayItem = (v: unknown): v is TrayItem => {
   return !!t && typeof t.id === "string" && typeof t.name === "string" && typeof t.signal === "string" && typeof t.order === "number";
 };
 
-// 16x16 단색 PNG. Windows는 PNG를 담은 ICO를 요구한다.
-const png = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGUlEQVR4nGNwaHjwnxLMMGrAqAGjBgwXAwD9T58frxtVkQAAAABJRU5ErkJggg==",
-  "base64",
-);
-const ico = Buffer.concat([
-  Buffer.from([0, 0, 1, 0, 1, 0, 16, 16, 0, 0, 1, 0, 32, 0]),
-  Buffer.from(new Uint32Array([png.length, 22]).buffer),
-  png,
-]);
-const icon = (process.platform === "win32" ? ico : png).toString("base64");
+// shortcut: Windows는 어두운 작업 표시줄용(dark) 아이콘만 쓴다, 테마 감지가 필요하면 light.ico와 전환.
+const trayIcons = { win32: "windows/rig-tray-dark.ico", darwin: "macos/rigTemplate-2x.png", linux: "linux/rig-tray-22.png" } as Record<string, string>;
+const iconFile = trayIcons[process.platform] ?? trayIcons.linux!;
+const icon = readFileSync(join(import.meta.dirname, "../../../assets/rig-icons/tray", iconFile)).toString("base64");
 
 const plugin: RigPlugin = async (ctx) => {
   const signals = new Map<MenuItem, string>();
@@ -43,7 +38,7 @@ const plugin: RigPlugin = async (ctx) => {
         signals.set(item, t.signal);
         return item;
       });
-    return { icon, title: "", tooltip: "rig", items };
+    return { icon, isTemplateIcon: process.platform === "darwin", title: "", tooltip: "rig", items };
   };
 
   const tray = new SysTray({ menu: await build() });
