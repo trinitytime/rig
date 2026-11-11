@@ -18,6 +18,27 @@ function run(cmd, args) {
   if (r.status !== 0) process.exit(r.status ?? 1);
 }
 
+// 이미 떠 있는지 확인한다: 포트가 응답하고 /health가 rig면 중복 구동하지 않는다.
+// (확인과 구동 사이의 경합은 막지 못한다. 마지막 방어선은 core의 포트 바인딩 실패다.)
+async function checkRunning() {
+  const port = Number(process.env.RIG_PORT ?? 7440); // core의 DEFAULT_PORT와 같은 값
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(1000) });
+    const body = await res.json().catch(() => null);
+    if (body?.name === "rig") {
+      console.log(`rig가 이미 실행 중입니다 (http://127.0.0.1:${port}).`);
+      process.exit(0);
+    }
+    console.error(`포트 ${port}를 다른 프로그램이 사용 중입니다.`);
+    process.exit(1);
+  } catch (e) {
+    if (e?.cause?.code === "ECONNREFUSED") return; // 비어 있음
+    console.error(`포트 ${port}를 확인하지 못했습니다 (${e?.cause?.code ?? e?.name ?? e}). 다른 프로그램이 사용 중일 수 있습니다.`);
+    process.exit(1);
+  }
+}
+await checkRunning();
+
 if (!existsSync(join(root, "node_modules"))) {
   run("npm", ["install"]);
   // ignore-scripts=true인 환경에서도 bun 바이너리가 준비되도록 bun의 postinstall만 직접 실행한다.
