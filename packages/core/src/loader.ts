@@ -9,6 +9,7 @@ import { ServiceRegistry } from "./services.js";
 export type PluginState = "active" | "failed" | "skipped";
 
 export interface PluginStatus {
+  id: string;
   name: string;
   source: DiscoveredPlugin["source"] | "unknown";
   state: PluginState;
@@ -30,6 +31,7 @@ export class PluginLoader {
   async loadAll(): Promise<PluginStatus[]> {
     const { plugins, errors } = discoverPlugins();
     this.statuses = errors.map((e) => ({
+      id: path.basename(e.dir),
       name: path.basename(e.dir),
       source: "unknown",
       state: "failed",
@@ -37,13 +39,13 @@ export class PluginLoader {
       error: e.error,
     }));
 
-    const byName = new Map(plugins.map((p) => [p.manifest.name, p]));
+    const byName = new Map(plugins.map((p) => [p.manifest.id, p]));
     const sorted: DiscoveredPlugin[] = [];
     const mark = new Map<string, "visiting" | "done">();
     const failed = new Map<string, string>(); // name -> 사유
 
     const visit = (p: DiscoveredPlugin, chain: string[]): void => {
-      const name = p.manifest.name;
+      const name = p.manifest.id;
       if (mark.get(name) === "done") return;
       if (mark.get(name) === "visiting") {
         failed.set(name, `circular requires: ${[...chain, name].join(" -> ")}`);
@@ -65,16 +67,16 @@ export class PluginLoader {
 
     for (const [name, error] of failed) {
       const p = byName.get(name)!;
-      this.statuses.push({ name, source: p.source, state: "skipped", requires: p.manifest.requires ?? [], error });
+      this.statuses.push({ id: name, name: p.manifest.name, source: p.source, state: "skipped", requires: p.manifest.requires ?? [], error });
     }
     for (const p of sorted) this.statuses.push(await this.activate(p));
     return this.statuses;
   }
 
   private async activate(p: DiscoveredPlugin): Promise<PluginStatus> {
-    const { name } = p.manifest;
+    const { id: name } = p.manifest;
     const requires = p.manifest.requires ?? [];
-    const status: PluginStatus = { name, source: p.source, state: "active", requires };
+    const status: PluginStatus = { id: name, name: p.manifest.name, source: p.source, state: "active", requires };
     if (!p.entry) return status; // UI 전용 플러그인
     try {
       if (!fs.existsSync(p.entry)) throw new Error(`backend not built: ${p.entry}`);

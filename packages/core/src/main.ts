@@ -3,7 +3,7 @@ import { startServer } from "./server.js";
 
 const loader = new PluginLoader();
 const statuses = await loader.loadAll();
-for (const s of statuses) console.log(`[rig] plugin ${s.name}: ${s.state}${s.error ? ` (${s.error})` : ""}`);
+for (const s of statuses) console.log(`[rig] plugin ${s.id}: ${s.state}${s.error ? ` (${s.error})` : ""}`);
 
 const server = startServer({ loader });
 

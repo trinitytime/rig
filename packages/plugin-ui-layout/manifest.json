@@ -1,4 +1,5 @@
 {
+  "id": "ui-layout",
   "name": "ui-layout",
   "apiVersion": 1,
   "backend": "index.js",

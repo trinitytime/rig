@@ -1,4 +1,5 @@
 {
+  "id": "browser",
   "name": "browser",
   "apiVersion": 1,
   "backend": "index.js",

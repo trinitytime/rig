@@ -47,11 +47,11 @@ export function discoverPlugins(): { plugins: DiscoveredPlugin[]; errors: Discov
     if (!fs.existsSync(path.join(dir, "manifest.json"))) return;
     try {
       const manifest = readManifest(dir);
-      if (seen.has(manifest.name)) {
-        errors.push({ dir, error: `duplicate plugin name "${manifest.name}" (ignored)` });
+      if (seen.has(manifest.id)) {
+        errors.push({ dir, error: `duplicate plugin id "${manifest.id}" (ignored)` });
         return;
       }
-      seen.add(manifest.name);
+      seen.add(manifest.id);
       const entry = manifest.backend ? path.resolve(outDir, manifest.backend) : undefined;
       plugins.push({ manifest, dir, entry, source });
     } catch (e) {

@@ -1,4 +1,5 @@
 {
+  "id": "storage",
   "name": "storage",
   "apiVersion": 1,
   "backend": "index.js",
