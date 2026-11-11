@@ -4,7 +4,7 @@
   "description": "Rig service plugin: shell slots / layout (ui-layout)",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.18"
   },
   "peerDependencies": {
     "@rig/core": "*"
