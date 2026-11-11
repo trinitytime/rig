@@ -1,0 +1,18 @@
+{
+  "name": "@rig/plugin-systray",
+  "version": "0.0.0",
+  "description": "Rig plugin: system tray menu built from the shared \"tray\" space (systray)",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "systray2": "^2.1.4"
+  },
+  "peerDependencies": {
+    "@rig/core": "*"
+  },
+  "devDependencies": {
+    "@rig/core": "*"
+  }
+}

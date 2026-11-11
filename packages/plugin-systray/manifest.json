@@ -1,0 +1,8 @@
+{
+  "id": "systray",
+  "name": "systray",
+  "apiVersion": 1,
+  "entry": "src/index.ts",
+  "requires": [],
+  "permissions": []
+}
