@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import { discoverPlugins, type DiscoveredPlugin } from "./discovery.js";
 import { rigHome } from "./paths.js";
 import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./plugin.js";
+import { createHttp, HttpRouter } from "./http.js";
 import { createSignal, SignalBus } from "./signal.js";
 import { createTimer } from "./timer.js";
 import { Ownership } from "./ownership.js";
@@ -24,6 +25,8 @@ export class PluginLoader {
   readonly services = new ServiceRegistry();
   /** 코어가 신호를 보낼 때도 이 버스를 쓴다. */
   readonly signals = new SignalBus();
+  /** 플러그인의 웹 API. 서버가 /api/<id>/* 를 여기로 보낸다. */
+  readonly http = new HttpRouter();
   private owned = new Ownership();
   private statuses: PluginStatus[] = [];
   private cleanups = new Map<string, PluginCleanup | undefined>();
@@ -105,6 +108,7 @@ export class PluginLoader {
         dataDir,
         timer: createTimer(track, log),
         signal: createSignal(this.signals, name, track, log),
+        http: createHttp(this.http, name, track, log),
         service: createService(this.services, name, requires, track),
       });
       this.owned.open(name);

@@ -25,12 +25,21 @@ export interface PluginService {
   call<T = unknown>(target: string, ...args: unknown[]): Promise<T>;
 }
 
+export interface PluginHttp {
+  /**
+   * 웹 API 핸들러를 등록한다 (플러그인당 1개). `/api/<내 id>/*` 요청이 오며,
+   * 요청 경로에서 접두사가 제거된다 (예: /api/<id>/items → /items). 반환값은 등록 해제 함수.
+   */
+  fetch(handler: (req: Request) => Response | Promise<Response>): () => void;
+}
+
 export interface PluginContext {
   log: PluginLogger;
   /** 사용자 데이터 폴더 아래 이 플러그인 전용 폴더 경로. */
   dataDir: string;
   timer: PluginTimer;
   signal: PluginSignal;
+  http: PluginHttp;
   service: PluginService;
 }
 
