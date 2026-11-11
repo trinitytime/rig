@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { chmodSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
 import type { RigPlugin } from "@rig/core";
 import * as mod from "systray2";
 import type SysTrayType from "systray2";
@@ -22,6 +23,11 @@ const iconFile = trayIcons[process.platform] ?? trayIcons.linux!;
 const icon = readFileSync(join(import.meta.dirname, "../../../assets/rig-icons/tray", iconFile)).toString("base64");
 
 const plugin: RigPlugin = async (ctx) => {
+  // systray2의 chmod('+x')가 실패해도 조용히 넘어가(특히 Bun) 실행 권한 없이 spawn되므로 직접 준다.
+  if (process.platform !== "win32") {
+    const bin = join(dirname(createRequire(import.meta.url).resolve("systray2")), "traybin", `tray_${process.platform === "darwin" ? "darwin" : "linux"}_release`);
+    chmodSync(bin, 0o755);
+  }
   const signals = new Map<MenuItem, string>();
 
   const build = async () => {
@@ -42,6 +48,7 @@ const plugin: RigPlugin = async (ctx) => {
   };
 
   const tray = new SysTray({ menu: await build() });
+  await tray.ready(); // 프로세스가 뜬 뒤에야 이벤트를 붙일 수 있다.
   tray.onError((e) => ctx.log.error("systray failed:", e));
   void tray.onClick(({ item }) => {
     const signal = signals.get(item);
