@@ -4,11 +4,17 @@ import { z } from "zod";
 /** 허용 호스트의 기본값. 항상 허용된다. */
 export const DEFAULT_ALLOWED_HOSTS = ["127.0.0.1", "localhost"];
 
-const extraHostsSchema = z.array(z.string().min(1)).catch([]);
-/** 기본값에 shared의 config/allowedHosts 값(있고 올바르면)을 합친다. */
-export const mergeAllowedHosts = (extra: unknown): string[] => [
-  ...new Set([...DEFAULT_ALLOWED_HOSTS, ...extraHostsSchema.parse(extra)]),
-];
+const extraHostsSchema = z.array(z.string().min(1));
+/** 기본값에 shared의 config/allowedHosts 값(있고 올바르면)을 합친다. 값이 있는데 잘못되었으면 무시하고 warn으로 알린다. */
+export function mergeAllowedHosts(extra: unknown, warn: (message: string) => void = () => {}): string[] {
+  let hosts: string[] = [];
+  if (extra !== undefined) {
+    const r = extraHostsSchema.safeParse(extra);
+    if (r.success) hosts = r.data;
+    else warn('shared "config/allowedHosts" must be a string array; ignored');
+  }
+  return [...new Set([...DEFAULT_ALLOWED_HOSTS, ...hosts])];
+}
 
 const parse = (s: string): URL | undefined => {
   try {

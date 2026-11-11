@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { createShared, SharedMemory } from "../src/ctx/shared.ts";
 import { SignalBus } from "../src/ctx/signal.ts";
 import { Ownership } from "../src/ctx/ownership.ts";
+import { mergeAllowedHosts } from "../src/security.ts";
 import { createApp, resolvePort } from "../src/server.ts";
 
 const tick = () => new Promise((r) => setTimeout(r, 5));
@@ -82,4 +83,15 @@ test("RIG_PORT는 1~65535 정수만 허용하고 없으면 기본 포트를 쓴�
   expect(resolvePort(undefined)).toBe(7440);
   expect(resolvePort("8080")).toBe(8080);
   for (const bad of ["abc", "0", "65536", "1.5", ""]) expect(() => resolvePort(bad)).toThrow("RIG_PORT");
+});
+
+test("잘못된 allowedHosts는 무시하고 경고하며, 없거나 올바르면 경고하지 않는다", () => {
+  const warned: string[] = [];
+  const warn = (m: string) => void warned.push(m);
+  expect(mergeAllowedHosts(undefined, warn)).toEqual(["127.0.0.1", "localhost"]);
+  expect(mergeAllowedHosts(["rig.local", "localhost"], warn)).toEqual(["127.0.0.1", "localhost", "rig.local"]);
+  expect(warned).toEqual([]);
+  expect(mergeAllowedHosts("rig.local", warn)).toEqual(["127.0.0.1", "localhost"]);
+  expect(mergeAllowedHosts([1], warn)).toEqual(["127.0.0.1", "localhost"]);
+  expect(warned.length).toBe(2);
 });

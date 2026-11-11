@@ -22,7 +22,8 @@ export function createApp(loader?: PluginLoader, opts: { port?: number } = {}): 
   const app = new Hono();
   // 허용 호스트: 기본값 + shared의 config/allowedHosts. 요청마다 읽지 않고, 시작할 때와 shared:config 신호가 올 때만 다시 계산한다.
   let allowed = mergeAllowedHosts(undefined);
-  const refresh = () => void (allowed = mergeAllowedHosts(loader?.shared.get("config", "allowedHosts")));
+  const warn = (message: string) => console.warn("[rig]", message);
+  const refresh = () => void (allowed = mergeAllowedHosts(loader?.shared.get("config", "allowedHosts"), warn));
   refresh();
   loader?.signals.on("shared:config", refresh, console);
   app.use("*", hostGuard(() => allowed, opts.port));
