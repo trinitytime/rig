@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PluginService } from "./plugin.js";
+import type { PluginService } from "../plugin/plugin.js";
 
 type Fn = (...args: any[]) => unknown;
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PluginLogger, PluginTimer } from "./plugin.js";
+import type { PluginLogger, PluginTimer } from "../plugin/plugin.js";
 
 /** setInterval의 최소 주기. 이보다 짧으면 거부한다. */
 export const MIN_INTERVAL_MS = 10;

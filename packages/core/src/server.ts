@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import type { PluginLoader } from "./loader.js";
+import type { PluginLoader } from "./plugin/loader.js";
 
 /** 기본 포트. 전화 키패드로 R-I-G = 7-4-4 (+0). 흔한 개발 포트(3000/5173/8080)와 겹치지 않음. */
 export const DEFAULT_PORT = 7440;

@@ -1,4 +1,4 @@
-import type { PluginHttp, PluginLogger } from "./plugin.js";
+import type { PluginHttp, PluginLogger } from "../plugin/plugin.js";
 
 type FetchHandler = (req: Request) => Response | Promise<Response>;
 

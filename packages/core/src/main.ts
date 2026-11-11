@@ -1,4 +1,4 @@
-import { PluginLoader } from "./loader.js";
+import { PluginLoader } from "./plugin/loader.js";
 import { startServer } from "./server.js";
 
 const loader = new PluginLoader();
