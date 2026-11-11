@@ -6,7 +6,7 @@ import type { PluginStorage } from "../plugin/plugin.ts";
 const json = z.json();
 
 /**
- * ctx.storage. dataDir/data.json 파일 하나에 JSON 값 하나를 저장한다.
+ * ctx.storage. dataDir/data.json 파일 하나에 JSON 값 하나를 저장한다. dataDir은 로더가 만들어 둔다.
  * 저장은 임시 파일에 쓴 뒤 이름을 바꿔서, 도중에 중단되어도 기존 파일이 깨지지 않는다.
  * 같은 플러그인의 save는 호출 순서대로 하나씩 실행된다.
  */
@@ -16,7 +16,6 @@ export function createStorage(dataDir: string): PluginStorage {
 
   const write = async (text: string) => {
     const tmp = `${file}.tmp`;
-    await fs.mkdir(dataDir, { recursive: true });
     await fs.writeFile(tmp, text);
     await fs.rename(tmp, file);
   };
