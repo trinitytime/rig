@@ -13,6 +13,7 @@
     "build": "tsc -b",
     "typecheck": "tsc -b",
     "test": "bun test",
+    "bundle": "bun build packages/core/src/main.ts --target bun --outfile dist/rig.js",
     "clean": "rm -rf dist",
     "dev": "tsc -b -w & node --watch dist/core/main.js",
     "start": "node packages/launcher/launcher.mjs"

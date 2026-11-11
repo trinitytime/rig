@@ -1,9 +1,22 @@
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** 저장소 루트. 실행 위치(cwd)가 아니라 이 파일 위치(<root>/dist/core/)로 계산한다. */
-export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+/**
+ * 저장소 루트: 이 파일에서 위로 올라가며 packages/ 와 package.json 이 있는 첫 폴더.
+ * 소스(packages/core/src), tsc 출력(dist/core), 단일 번들(dist/rig.js) 어디서 실행해도 같은 값이 나온다.
+ */
+function findRepoRoot(): string {
+  let dir = path.dirname(fileURLToPath(import.meta.url));
+  for (;;) {
+    if (fs.existsSync(path.join(dir, "packages")) && fs.existsSync(path.join(dir, "package.json"))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) throw new Error("cannot locate the repository root");
+    dir = parent;
+  }
+}
+export const REPO_ROOT = findRepoRoot();
 
 /** 사용자 데이터 폴더. RIG_HOME > %APPDATA%/rig (Windows) > ~/.config/rig */
 export function rigHome(): string {
