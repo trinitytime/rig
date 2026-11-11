@@ -6,6 +6,14 @@ type FetchHandler = (req: Request) => Response | Promise<Response>;
 const RESERVED = new Set(["plugins"]);
 
 /** 플러그인이 등록한 fetch 핸들러를 `/api/<id>/*` 로 연결한다. 핸들러는 접두사가 제거된 경로를 받는다. */
+function safeDecode(s: string): string | undefined {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return undefined; // 잘못된 % 표기
+  }
+}
+
 export class HttpRouter {
   private handlers = new Map<string, { fn: FetchHandler; log: PluginLogger }>();
 
@@ -23,8 +31,11 @@ export class HttpRouter {
   async handle(id: string, req: Request): Promise<Response> {
     const h = this.handlers.get(id);
     if (!h) return Response.json({ error: "not found" }, { status: 404 });
+    // 인코딩된 원본 경로에서 /api/<id> 를 떼어 낸다 (디코딩된 id의 길이로 자르면 %70 같은 표기에서 어긋난다).
     const url = new URL(req.url);
-    url.pathname = url.pathname.slice(`/api/${id}`.length) || "/";
+    const m = /^\/api\/([^/]+)(\/.*)?$/.exec(url.pathname);
+    if (!m || safeDecode(m[1]!) !== id) return Response.json({ error: "not found" }, { status: 404 });
+    url.pathname = m[2] ?? "/";
     try {
       const res = await h.fn(new Request(url, req));
       if (!(res instanceof Response)) throw new Error("fetch handler must return a Response");
