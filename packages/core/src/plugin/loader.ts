@@ -6,7 +6,6 @@ import { rigHome } from "../paths.ts";
 import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./plugin.ts";
 import { createHttp, HttpRouter } from "../ctx/http.ts";
 import { createSignal, SignalBus } from "../ctx/signal.ts";
-import { CORE_OWNER, DEFAULT_ALLOWED_HOSTS } from "../security.ts";
 import { createShared, SharedMemory } from "../ctx/shared.ts";
 import { createTimer } from "../ctx/timer.ts";
 import { Ownership } from "../ctx/ownership.ts";
@@ -24,17 +23,13 @@ export interface PluginStatus {
 }
 
 export class PluginLoader {
-  constructor() {
-    // 코어가 소유하므로 플러그인은 읽기만 할 수 있다. 코어는 종료될 때까지 해제하지 않는다.
-    this.shared.set(CORE_OWNER, "config", "allowedHosts", DEFAULT_ALLOWED_HOSTS, () => () => {});
-  }
 
   readonly services = new ServiceRegistry();
   /** 코어가 신호를 보낼 때도 이 버스를 쓴다. */
   readonly signals = new SignalBus();
   /** 플러그인의 웹 API. 서버가 /api/<id>/* 를 여기로 보낸다. */
   readonly http = new HttpRouter();
-  /** 플러그인 간 공유 값. 코어도 config 워크스페이스를 여기에 둔다. */
+  /** 플러그인 간 공유 값. 코어는 config 워크스페이스의 설정(allowedHosts 등)을 여기서 읽는다. */
   readonly shared = new SharedMemory((signal, payload) => this.signals.emit(signal, payload));
   private owned = new Ownership();
   private statuses: PluginStatus[] = [];

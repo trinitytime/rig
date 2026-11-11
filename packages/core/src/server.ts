@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import type { PluginLoader } from "./plugin/loader.ts";
-import { hostGuard, parseAllowedHosts } from "./security.ts";
+import { hostGuard, mergeAllowedHosts } from "./security.ts";
 
 /** 기본 포트. 전화 키패드로 R-I-G = 7-4-4 (+0). 흔한 개발 포트(3000/5173/8080)와 겹치지 않음. */
 export const DEFAULT_PORT = 7440;
@@ -10,8 +10,12 @@ export const DEFAULT_HOST = "127.0.0.1";
 
 export function createApp(loader?: PluginLoader, opts: { port?: number } = {}): Hono {
   const app = new Hono();
-  // 허용 호스트는 shared의 config/allowedHosts에서 요청마다 읽는다.
-  app.use("*", hostGuard(() => parseAllowedHosts(loader?.shared.get("config", "allowedHosts")), opts.port));
+  // 허용 호스트: 기본값 + shared의 config/allowedHosts. 요청마다 읽지 않고, 시작할 때와 shared:config 신호가 올 때만 다시 계산한다.
+  let allowed = mergeAllowedHosts(undefined);
+  const refresh = () => void (allowed = mergeAllowedHosts(loader?.shared.get("config", "allowedHosts")));
+  refresh();
+  loader?.signals.on("shared:config", refresh, console);
+  app.use("*", hostGuard(() => allowed, opts.port));
   app.get("/", (c) => c.html("<!doctype html><title>Rig</title><div id=\"rig-shell\"></div>"));
   app.get("/health", (c) => c.json({ ok: true, name: "rig", apiVersion: 1 }));
   app.get("/api/plugins", (c) => c.json(loader?.list() ?? []));

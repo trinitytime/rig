@@ -1,13 +1,18 @@
 import { expect, test } from "bun:test";
 import { createShared, SharedMemory } from "../src/ctx/shared.ts";
+import { SignalBus } from "../src/ctx/signal.ts";
 import { Ownership } from "../src/ctx/ownership.ts";
-import { CORE_OWNER, DEFAULT_ALLOWED_HOSTS } from "../src/security.ts";
 import { createApp } from "../src/server.ts";
 
-function setup() {
-  const shared = new SharedMemory(() => {});
-  shared.set(CORE_OWNER, "config", "allowedHosts", DEFAULT_ALLOWED_HOSTS, () => () => {});
-  return { shared, app: createApp({ shared } as never, { port: 7440 }) };
+const tick = () => new Promise((r) => setTimeout(r, 5));
+
+function setup(emitSignals = true) {
+  const signals = new SignalBus();
+  const shared = new SharedMemory((s, p) => (emitSignals ? signals.emit(s, p) : undefined));
+  const o = new Ownership();
+  o.open("p");
+  const plugin = createShared(shared, "p", (d) => o.track("p", d));
+  return { plugin, app: createApp({ shared, signals } as never, { port: 7440 }) };
 }
 const status = async (app: ReturnType<typeof createApp>, headers: Record<string, string>) =>
   (await app.request("/health", { headers })).status;
@@ -37,16 +42,38 @@ test("다른 사이트의 Origin과 cross-site 요청은 403이고, 같은 출�
   expect(await status(app, { host, "sec-fetch-site": "same-origin" })).toBe(200);
 });
 
-test("허용 목록은 shared의 config/allowedHosts에서 읽고, 플러그인은 바꿀 수 없다", async () => {
-  const { shared, app } = setup();
+test("config/allowedHosts가 있으면 기본값과 합쳐 쓰고, 없어지거나 잘못되면 기본값만 쓴다 (신호가 올 때 반영)", async () => {
+  const { plugin, app } = setup();
+  const rig = { host: "rig.local:7440" };
+  const loop = { host: "127.0.0.1:7440" };
+  expect(await status(app, rig)).toBe(403);
+  await plugin.set("config", "allowedHosts", ["rig.local"]);
+  await tick();
+  expect(await status(app, rig)).toBe(200);
+  expect(await status(app, loop)).toBe(200); // 기본값은 유지
+  await plugin.set("config", "allowedHosts", "not-an-array");
+  await tick();
+  expect(await status(app, rig)).toBe(403);
+  expect(await status(app, loop)).toBe(200);
+  await plugin.set("config", "allowedHosts", ["rig.local"]);
+  await plugin.delete("config", "allowedHosts");
+  await tick();
+  expect(await status(app, rig)).toBe(403);
+});
+
+test("신호가 없으면 요청마다 다시 읽지 않는다", async () => {
+  const { plugin, app } = setup(false);
+  await plugin.set("config", "allowedHosts", ["rig.local"]);
+  await tick();
+  expect(await status(app, { host: "rig.local:7440" })).toBe(403);
+});
+
+test("시작 전에 이미 있는 값은 시작할 때 반영한다", async () => {
+  const signals = new SignalBus();
+  const shared = new SharedMemory(() => {});
   const o = new Ownership();
   o.open("p");
-  const plugin = createShared(shared, "p", (d) => o.track("p", d));
-  await expect(plugin.set("config", "allowedHosts", ["evil.com"])).rejects.toThrow("owned by another");
-  await expect(plugin.delete("config", "allowedHosts")).rejects.toThrow("owned by another");
-  expect(await plugin.get("config", "allowedHosts")).toEqual(DEFAULT_ALLOWED_HOSTS);
-
-  shared.set(CORE_OWNER, "config", "allowedHosts", ["rig.local"], () => () => {});
+  await createShared(shared, "p", (d) => o.track("p", d)).set("config", "allowedHosts", ["rig.local"]);
+  const app = createApp({ shared, signals } as never, { port: 7440 });
   expect(await status(app, { host: "rig.local:7440" })).toBe(200);
-  expect(await status(app, { host: "127.0.0.1:7440" })).toBe(403);
 });

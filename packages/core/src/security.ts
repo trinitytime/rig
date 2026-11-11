@@ -1,13 +1,14 @@
 import type { MiddlewareHandler } from "hono";
 import { z } from "zod";
 
-/** 코어가 shared에 값을 쓸 때의 소유자. 플러그인 id 규칙(영문자, 숫자, -, _)에 없는 문자라 플러그인과 겹치지 않는다. */
-export const CORE_OWNER = "$core";
-/** 허용 호스트의 기본값. shared의 config 워크스페이스, allowedHosts key에 저장된다 (코어만 바꿀 수 있음). */
+/** 허용 호스트의 기본값. 항상 허용된다. */
 export const DEFAULT_ALLOWED_HOSTS = ["127.0.0.1", "localhost"];
 
-const allowedHostsSchema = z.array(z.string().min(1)).catch(DEFAULT_ALLOWED_HOSTS);
-export const parseAllowedHosts = (v: unknown): string[] => allowedHostsSchema.parse(v ?? DEFAULT_ALLOWED_HOSTS);
+const extraHostsSchema = z.array(z.string().min(1)).catch([]);
+/** 기본값에 shared의 config/allowedHosts 값(있고 올바르면)을 합친다. */
+export const mergeAllowedHosts = (extra: unknown): string[] => [
+  ...new Set([...DEFAULT_ALLOWED_HOSTS, ...extraHostsSchema.parse(extra)]),
+];
 
 const parse = (s: string): URL | undefined => {
   try {
