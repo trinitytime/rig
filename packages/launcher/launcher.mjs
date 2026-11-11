@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 외부 의존성 없는 런처: node_modules가 없으면 npm install(workspaces: packages/* 전체) 후 node_modules에 설치된 bun으로 core를 구동한다.
 import { existsSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -44,4 +44,13 @@ if (!existsSync(join(root, "node_modules"))) {
   // ignore-scripts=true인 환경에서도 bun 바이너리가 준비되도록 bun의 postinstall만 직접 실행한다.
   run(process.execPath, [join(root, "node_modules", "bun", "install.js")]);
 }
-run(bunBin, [join(root, "packages/core/src/main.ts"), ...process.argv.slice(2)]);
+
+// core는 비동기로 띄우고 종료 신호를 전달한다. 런처만 죽으면 core가 고아로 남아 정리(unloadAll)가 실행되지 않는다.
+const core = spawn(bunBin, [join(root, "packages/core/src/main.ts"), ...process.argv.slice(2)], { cwd: root, stdio: "inherit" });
+for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => core.kill(sig));
+core.on("error", (e) => {
+  console.error(e.code === "ENOENT" ? "bun을 찾을 수 없습니다. (bun은 core의 의존성으로 node_modules에 설치됩니다)" : e.message);
+  process.exit(1);
+});
+core.on("exit", (code) => process.exit(code ?? 1));
+
