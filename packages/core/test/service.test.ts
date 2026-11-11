@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { Ownership } from "../src/ownership.js";
-import { createService, ServiceRegistry } from "../src/services.js";
+import { Ownership } from "../src/ctx/ownership.ts";
+import { createService, ServiceRegistry } from "../src/ctx/services.ts";
 
 function plugin(reg: ServiceRegistry, o: Ownership, id: string, requires: string[] = []) {
   o.open(id);

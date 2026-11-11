@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { Ownership } from "../src/ownership.js";
-import { createSignal, SignalBus } from "../src/signal.js";
+import { Ownership } from "../src/ctx/ownership.ts";
+import { createSignal, SignalBus } from "../src/ctx/signal.ts";
 
 const log = { info() {}, warn() {}, error() {} };
 const tick = () => new Promise((r) => setTimeout(r, 5));

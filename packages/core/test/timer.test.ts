@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { Ownership } from "../src/ownership.js";
-import { createTimer } from "../src/timer.js";
+import { Ownership } from "../src/ctx/ownership.ts";
+import { createTimer } from "../src/ctx/timer.ts";
 
 const log = { info() {}, warn() {}, error() {} };
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

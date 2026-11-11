@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { HttpRouter } from "../src/http.js";
-import { createApp } from "../src/server.js";
-import { Ownership } from "../src/ownership.js";
+import { HttpRouter } from "../src/ctx/http.ts";
+import { createApp } from "../src/server.ts";
+import { Ownership } from "../src/ctx/ownership.ts";
 
 const log = { info() {}, warn() {}, error() {} };
 

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Ownership } from "../src/ownership.js";
+import { Ownership } from "../src/ctx/ownership.ts";
 
 test("release는 id의 등록을 역순으로 모두 해제하고, 이후 track은 거부한다", () => {
   const o = new Ownership();

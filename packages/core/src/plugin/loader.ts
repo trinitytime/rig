@@ -1,14 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { discoverPlugins, type DiscoveredPlugin } from "./discovery.js";
-import { rigHome } from "../paths.js";
-import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./plugin.js";
-import { createHttp, HttpRouter } from "../ctx/http.js";
-import { createSignal, SignalBus } from "../ctx/signal.js";
-import { createTimer } from "../ctx/timer.js";
-import { Ownership } from "../ctx/ownership.js";
-import { createService, ServiceRegistry } from "../ctx/services.js";
+import { discoverPlugins, type DiscoveredPlugin } from "./discovery.ts";
+import { rigHome } from "../paths.ts";
+import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from "./plugin.ts";
+import { createHttp, HttpRouter } from "../ctx/http.ts";
+import { createSignal, SignalBus } from "../ctx/signal.ts";
+import { createTimer } from "../ctx/timer.ts";
+import { Ownership } from "../ctx/ownership.ts";
+import { createService, ServiceRegistry } from "../ctx/services.ts";
 
 export type PluginState = "active" | "failed" | "skipped";
 

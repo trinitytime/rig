@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PluginLogger, PluginSignal } from "../plugin/plugin.js";
+import type { PluginLogger, PluginSignal } from "../plugin/plugin.ts";
 
 /** 신호 이름: `<발행자 id>:<이벤트>`. 코어가 보내는 신호는 `core:` 로 시작한다. */
 const signalName = z.string().regex(/^[A-Za-z0-9_-]+:[A-Za-z0-9_.-]+$/, "must look like '<id>:<event>'");

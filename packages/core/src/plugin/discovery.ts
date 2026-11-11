@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { parseManifest, type PluginManifest } from "./manifest.js";
-import { REPO_ROOT, rigHome } from "../paths.js";
+import { parseManifest, type PluginManifest } from "./manifest.ts";
+import { REPO_ROOT, rigHome } from "../paths.ts";
 
 export interface DiscoveredPlugin {
   manifest: PluginManifest;

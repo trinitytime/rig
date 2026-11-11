@@ -1,5 +1,5 @@
-import { PluginLoader } from "./plugin/loader.js";
-import { startServer } from "./server.js";
+import { PluginLoader } from "./plugin/loader.ts";
+import { startServer } from "./server.ts";
 
 const loader = new PluginLoader();
 const statuses = await loader.loadAll();
