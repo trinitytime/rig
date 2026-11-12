@@ -56,9 +56,10 @@ if (isPlaceholder()) {
   }
 }
 
+// bun은 구동만 맡는다(--no-install: 자동 설치 끔). 설치는 위의 npm install이 한다.
 // core를 런처와 분리해서 띄우고, /health가 응답하면 런처는 종료한다.
 // shortcut: core의 출력은 버려진다(stdio ignore), 로그 파일이 필요해지면 파일로 연결.
-const core = spawn(bunBin, [join(root, "packages/core/src/main.ts"), ...process.argv.slice(2)], { cwd: root, stdio: "ignore", detached: true, windowsHide: true });
+const core = spawn(bunBin, ["--no-install", join(root, "packages/core/src/main.ts"), ...process.argv.slice(2)], { cwd: root, stdio: "ignore", detached: true, windowsHide: true });
 let exited = null;
 core.on("error", (e) => (exited = e.code === "ENOENT" ? "bun을 찾을 수 없습니다. (bun은 core의 의존성으로 node_modules에 설치됩니다)" : e.message));
 core.on("exit", (code) => (exited = `core가 종료되었습니다 (code ${code})`));
