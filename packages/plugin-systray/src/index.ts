@@ -10,6 +10,9 @@ import type { MenuItem } from "systray2";
 const m: any = mod;
 const SysTray: typeof SysTrayType.default = m.default?.default ?? m.default ?? m;
 
+// 마지막 신호 뒤 이 시간 동안 조용하면 shared "tray"를 읽어 트레이를 구성한다. 신호가 오면 다시 이 시간만큼 미룬다.
+const SETTLE_MS = 1000;
+
 type TrayItem = { id: string; name: string; signal: string; order: number };
 
 const isTrayItem = (v: unknown): v is TrayItem => {
@@ -44,9 +47,8 @@ const plugin: RigPlugin = async (ctx) => {
     return { icon, isTemplateIcon: process.platform === "darwin", title: "", tooltip: "rig", items };
   };
 
-  const start = async () => {
-    const signals = new Map<MenuItem, string>();
-    const tray = new SysTray({ menu: await build(signals) });
+  const start = async (menu: Awaited<ReturnType<typeof build>>, signals: Map<MenuItem, string>) => {
+    const tray = new SysTray({ menu });
     await tray.ready(); // 프로세스가 뜬 뒤에야 이벤트를 붙일 수 있다.
     tray.onError((e) => ctx.log.error("systray failed:", e));
     void tray.onClick(({ item }) => {
@@ -61,28 +63,35 @@ const plugin: RigPlugin = async (ctx) => {
     return tray;
   };
 
-  let tray = await start();
+  let tray: InstanceType<typeof SysTray> | undefined;
   let queue: Promise<unknown> = Promise.resolve();
-  let scheduled = false;
+  let cancel: (() => void) | undefined;
 
-  // Linux 트레이 바이너리는 update-menu로 항목 수를 바꾸지 못한다(제목 등만 바뀐다). 그래서 변경이 있으면 트레이를 다시 띄운다.
-  // 짧은 시간의 연속 변경(플러그인이 연달아 로드될 때)은 한 번으로 묶는다.
+  // 항목이 하나도 없으면 아무것도 하지 않는다(기존 트레이도 그대로 둔다).
+  // Linux 트레이 바이너리는 update-menu로 항목 수를 바꾸지 못하므로, 갱신은 트레이를 닫고 다시 띄운다.
   // shortcut: 재시작 동안 아이콘이 잠깐 사라진다, 거슬리면 Linux 외 OS만 update-menu를 쓰거나 숨김 항목을 미리 만들어 둔다.
-  ctx.signal.on("shared:tray", () => {
-    if (scheduled) return;
-    scheduled = true;
-    ctx.timer.setTimeout(() => {
-      scheduled = false;
-      queue = queue.then(async () => {
-        await tray.kill(false);
-        tray = await start();
-      }).catch((e) => ctx.log.error("cannot refresh tray:", e));
-    }, 200);
-  });
+  const refresh = async () => {
+    const signals = new Map<MenuItem, string>();
+    const menu = await build(signals);
+    if (menu.items.length === 0) return;
+    await tray?.kill(false);
+    tray = undefined;
+    tray = await start(menu, signals);
+  };
+
+  const schedule = () => {
+    cancel?.();
+    cancel = ctx.timer.setTimeout(() => {
+      queue = queue.then(refresh).catch((e) => ctx.log.error("cannot refresh tray:", e));
+    }, SETTLE_MS);
+  };
+  schedule(); // 초기화 후 SETTLE_MS 동안 신호가 없으면 처음 구성한다
+  ctx.signal.on("shared:tray", schedule);
 
   return async () => {
+    cancel?.();
     await queue;
-    await tray.kill(false);
+    await tray?.kill(false);
   };
 };
 export default plugin;
