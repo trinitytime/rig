@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 외부 의존성 없는 런처: node_modules가 없으면 npm install(workspaces: packages/* 전체) 후 node_modules에 설치된 bun으로 core를 구동한다.
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -44,10 +44,16 @@ async function checkRunning() {
 }
 const port = await checkRunning();
 
-if (!existsSync(join(root, "node_modules"))) {
-  run("npm", ["install"]);
-  // ignore-scripts=true인 환경에서도 bun 바이너리가 준비되도록 bun의 postinstall만 직접 실행한다.
+if (!existsSync(join(root, "node_modules"))) run("npm", ["install"]);
+// ignore-scripts=true라 npm install만으로는 bin/bun.exe가 자리표시자(수 KB)로 남는다. 그대로 실행하면 Windows에서 spawn UNKNOWN이 되므로,
+// 진짜 바이너리가 아니면 bun의 postinstall만 직접 실행한다 (node_modules가 이미 있어도 확인한다).
+const isPlaceholder = () => !existsSync(bunBin) || statSync(bunBin).size < 1_000_000;
+if (isPlaceholder()) {
   run(process.execPath, [join(root, "node_modules", "bun", "install.js")]);
+  if (isPlaceholder()) {
+    console.error("bun 바이너리를 준비하지 못했습니다. 네트워크를 확인하고 다시 실행하세요.");
+    process.exit(1);
+  }
 }
 
 // core를 런처와 분리해서 띄우고, /health가 응답하면 런처는 종료한다.
