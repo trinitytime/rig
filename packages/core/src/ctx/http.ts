@@ -3,10 +3,10 @@ import type { Track } from "./ownership.ts";
 
 type FetchHandler = (req: Request) => Response | Promise<Response>;
 
-/** 코어 자신이 쓰는 /api/ 하위 경로. 이 id의 플러그인은 등록할 수 없다. */
-const RESERVED = new Set(["plugins"]);
+/** 코어 자신이 쓰는 최상위 경로(/health, /api/plugins). 이 id의 플러그인은 등록할 수 없다. */
+const RESERVED = new Set(["health", "api"]);
 
-/** 플러그인이 등록한 fetch 핸들러를 `/api/<id>/*` 로 연결한다. 핸들러는 접두사가 제거된 경로를 받는다. */
+/** 플러그인이 등록한 fetch 핸들러를 `/<id>/*` 로 연결한다. 핸들러는 접두사가 제거된 경로를 받는다. */
 function safeDecode(s: string): string | undefined {
   try {
     return decodeURIComponent(s);
@@ -20,7 +20,7 @@ export class HttpRouter {
 
   register(id: string, fn: FetchHandler, log: PluginLogger): () => void {
     if (typeof fn !== "function") throw new Error("fetch handler must be a function");
-    if (RESERVED.has(id)) throw new Error(`"/api/${id}" is reserved by the core`);
+    if (RESERVED.has(id)) throw new Error(`"/${id}" is reserved by the core`);
     if (this.handlers.has(id)) throw new Error("fetch handler is already registered");
     const entry = { fn, log };
     this.handlers.set(id, entry);
@@ -32,9 +32,9 @@ export class HttpRouter {
   async handle(id: string, req: Request): Promise<Response> {
     const h = this.handlers.get(id);
     if (!h) return Response.json({ error: "not found" }, { status: 404 });
-    // 인코딩된 원본 경로에서 /api/<id> 를 떼어 낸다 (디코딩된 id의 길이로 자르면 %70 같은 표기에서 어긋난다).
+    // 인코딩된 원본 경로에서 /<id> 를 떼어 낸다 (디코딩된 id의 길이로 자르면 %70 같은 표기에서 어긋난다).
     const url = new URL(req.url);
-    const m = /^\/api\/([^/]+)(\/.*)?$/.exec(url.pathname);
+    const m = /^\/([^/]+)(\/.*)?$/.exec(url.pathname);
     if (!m || safeDecode(m[1]!) !== id) return Response.json({ error: "not found" }, { status: 404 });
     url.pathname = m[2] ?? "/";
     try {

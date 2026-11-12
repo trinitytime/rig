@@ -30,7 +30,7 @@ export function createApp(loader?: PluginLoader, opts: { port?: number } = {}): 
   app.get("/", (c) => c.html("<!doctype html><title>Rig</title><div id=\"rig-shell\"></div>"));
   app.get("/health", (c) => c.json({ ok: true, name: "rig", apiVersion: 1 }));
   app.get("/api/plugins", (c) => c.json(loader?.list() ?? []));
-  if (loader) app.all("/api/:plugin/*", (c) => loader.http.handle(c.req.param("plugin"), c.req.raw));
+  if (loader) app.all("/:plugin/*", (c) => loader.http.handle(c.req.param("plugin"), c.req.raw));
   return app;
 }
 

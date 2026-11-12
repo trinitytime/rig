@@ -28,7 +28,7 @@ export class PluginLoader {
   readonly services = new ServiceRegistry();
   /** 코어가 신호를 보낼 때도 이 버스를 쓴다. */
   readonly signals = new SignalBus();
-  /** 플러그인의 웹 API. 서버가 /api/<id>/* 를 여기로 보낸다. */
+  /** 플러그인의 웹 API. 서버가 /<id>/* 를 여기로 보낸다. */
   readonly http = new HttpRouter();
   /** 플러그인 간 공유 값. 코어는 config 워크스페이스의 설정(allowedHosts 등)을 여기서 읽는다. */
   readonly shared = new SharedMemory((signal, payload) => this.signals.emit(signal, payload));
