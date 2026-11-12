@@ -36,12 +36,12 @@ async function checkRunning() {
     console.error(`포트 ${port}를 다른 프로그램이 사용 중입니다.`);
     process.exit(1);
   } catch (e) {
-    if (e?.cause?.code === "ECONNREFUSED") return; // 비어 있음
+    if (e?.cause?.code === "ECONNREFUSED") return port; // 비어 있음
     console.error(`포트 ${port}를 확인하지 못했습니다 (${e?.cause?.code ?? e?.name ?? e}). 다른 프로그램이 사용 중일 수 있습니다.`);
     process.exit(1);
   }
 }
-await checkRunning();
+const port = await checkRunning();
 
 if (!existsSync(join(root, "node_modules"))) {
   run("npm", ["install"]);
@@ -49,12 +49,24 @@ if (!existsSync(join(root, "node_modules"))) {
   run(process.execPath, [join(root, "node_modules", "bun", "install.js")]);
 }
 
-// core는 비동기로 띄우고 종료 신호를 전달한다. 런처만 죽으면 core가 고아로 남아 정리(unloadAll)가 실행되지 않는다.
-const core = spawn(bunBin, [join(root, "packages/core/src/main.ts"), ...process.argv.slice(2)], { cwd: root, stdio: "inherit" });
-for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => core.kill(sig));
-core.on("error", (e) => {
-  console.error(e.code === "ENOENT" ? "bun을 찾을 수 없습니다. (bun은 core의 의존성으로 node_modules에 설치됩니다)" : e.message);
-  process.exit(1);
-});
-core.on("exit", (code) => process.exit(code ?? 1));
+// core를 런처와 분리해서 띄우고, /health가 응답하면 런처는 종료한다.
+// shortcut: core의 출력은 버려진다(stdio ignore), 로그 파일이 필요해지면 파일로 연결.
+const core = spawn(bunBin, [join(root, "packages/core/src/main.ts"), ...process.argv.slice(2)], { cwd: root, stdio: "ignore", detached: true, windowsHide: true });
+let exited = null;
+core.on("error", (e) => (exited = e.code === "ENOENT" ? "bun을 찾을 수 없습니다. (bun은 core의 의존성으로 node_modules에 설치됩니다)" : e.message));
+core.on("exit", (code) => (exited = `core가 종료되었습니다 (code ${code})`));
 
+for (let i = 0; i < 75 && !exited; i++) {
+  const ok = await fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(1000) })
+    .then((r) => r.json())
+    .then((b) => b?.name === "rig", () => false);
+  if (ok) {
+    console.log(`rig가 구동되었습니다 (http://127.0.0.1:${port}, pid ${core.pid}).`);
+    core.unref();
+    process.exit(0);
+  }
+  await new Promise((r) => setTimeout(r, 200));
+}
+console.error(exited ?? "core가 15초 안에 응답하지 않았습니다.");
+core.kill();
+process.exit(1);
