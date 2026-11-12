@@ -27,7 +27,7 @@ function isInside(root: string, file: string): boolean {
   return !rel.startsWith("..") && !path.isAbsolute(rel);
 }
 
-function subdirs(dir: string): string[] {
+function subDirs(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir, { withFileTypes: true })
@@ -35,7 +35,7 @@ function subdirs(dir: string): string[] {
     .flatMap((d) => {
       const p = path.join(dir, d.name);
       // @scope/name 형태 처리
-      return d.name.startsWith("@") ? subdirs(p) : [p];
+      return d.name.startsWith("@") ? subDirs(p) : [p];
     });
 }
 
@@ -67,10 +67,10 @@ export function discoverPlugins(): { plugins: DiscoveredPlugin[]; errors: Discov
     }
   };
 
-  for (const dir of subdirs(path.join(REPO_ROOT, "packages")))
+  for (const dir of subDirs(path.join(REPO_ROOT, "packages")))
     add(dir, "builtin");
 
-  for (const dir of subdirs(path.join(rigHome(), "plugins", "node_modules"))) add(dir, "user");
+  for (const dir of subDirs(path.join(rigHome(), "plugins", "node_modules"))) add(dir, "user");
 
   return { plugins, errors };
 }

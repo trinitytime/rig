@@ -4,7 +4,7 @@ import type { Track } from "./ownership.ts";
 
 /** setInterval의 최소 주기. 이보다 짧으면 거부한다. */
 export const MIN_INTERVAL_MS = 10;
-const delaySchema = z.number().finite().nonnegative().max(2 ** 31 - 1);
+const delaySchema = z.number().nonnegative().max(2 ** 31 - 1);
 const intervalSchema = delaySchema.min(MIN_INTERVAL_MS);
 
 /**
