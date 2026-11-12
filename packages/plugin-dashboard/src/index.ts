@@ -80,6 +80,10 @@ const plugin: RigPlugin = (ctx) => {
 
   ctx.http.fetch((req) => app.fetch(req));
 
+  ctx.shared
+    .set("tray", "dashboard", { id: "dashboard", name: "Dashboard", signal: "dashboard:open", order: 100 })
+    .catch((e) => ctx.log.error("cannot add tray item:", e));
+
   // 기본 브라우저로 대시보드를 연다. 플러그인은 코어의 포트 상수를 import하지 않으므로 주소를 고정해 둔다.
   ctx.signal.on("dashboard:open", () => {
     const [cmd, ...args] =
