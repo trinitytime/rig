@@ -1,6 +1,6 @@
 {
-  "id": "ui-layout",
-  "name": "ui-layout",
+  "id": "dashboard",
+  "name": "dashboard",
   "apiVersion": 1,
   "entry": "src/index.ts",
   "requires": [],

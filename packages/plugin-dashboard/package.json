@@ -1,10 +1,13 @@
 {
-  "name": "@rig/plugin-ui-layout",
+  "name": "@rig/plugin-dashboard",
   "version": "0.0.0",
-  "description": "Rig service plugin: shell slots / layout (ui-layout)",
+  "description": "Rig plugin: renders declarative plugin UI pages from the shared \"ui\" space (dashboard)",
   "type": "module",
   "engines": {
     "node": ">=22.18"
+  },
+  "dependencies": {
+    "hono": "^4.13.17"
   },
   "peerDependencies": {
     "@rig/core": "*"
