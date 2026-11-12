@@ -28,14 +28,8 @@ const plugin: RigPlugin = async (ctx) => {
     const bin = join(dirname(createRequire(import.meta.url).resolve("systray2")), "traybin", `tray_${process.platform === "darwin" ? "darwin" : "linux"}_release`);
     chmodSync(bin, 0o755);
   }
-  const signals = new Map<MenuItem, string>();
-  // systray2는 update-menu 때 새 항목에 __id를 주지 않아 클릭이 undefined로 오고 예외가 난다. 처음 메뉴는 생성자가 1..n을 주므로 그 뒤 번호를 직접 부여한다.
-  // shortcut: private 필드(internalIdMap)에 직접 접근한다, systray2를 올리면 확인.
-  let nextId = 1_000_000;
-
-  const build = async () => {
+  const build = async (signals: Map<MenuItem, string>) => {
     const space = await ctx.shared.get("tray");
-    signals.clear();
     const items = Object.values(space)
       .filter((v): v is TrayItem => {
         if (!isTrayItem(v)) ctx.log.warn("ignored invalid tray value:", v);
@@ -50,27 +44,45 @@ const plugin: RigPlugin = async (ctx) => {
     return { icon, isTemplateIcon: process.platform === "darwin", title: "", tooltip: "rig", items };
   };
 
-  const tray = new SysTray({ menu: await build() });
-  await tray.ready(); // 프로세스가 뜬 뒤에야 이벤트를 붙일 수 있다.
-  tray.onError((e) => ctx.log.error("systray failed:", e));
-  void tray.onClick(({ item }) => {
-    const signal = signals.get(item);
-    if (!signal) return;
-    try {
-      ctx.signal.emit(signal);
-    } catch (e) {
-      ctx.log.error(`cannot emit "${signal}":`, e);
-    }
+  const start = async () => {
+    const signals = new Map<MenuItem, string>();
+    const tray = new SysTray({ menu: await build(signals) });
+    await tray.ready(); // 프로세스가 뜬 뒤에야 이벤트를 붙일 수 있다.
+    tray.onError((e) => ctx.log.error("systray failed:", e));
+    void tray.onClick(({ item }) => {
+      const signal = signals.get(item);
+      if (!signal) return;
+      try {
+        ctx.signal.emit(signal);
+      } catch (e) {
+        ctx.log.error(`cannot emit "${signal}":`, e);
+      }
+    });
+    return tray;
+  };
+
+  let tray = await start();
+  let queue: Promise<unknown> = Promise.resolve();
+  let scheduled = false;
+
+  // Linux 트레이 바이너리는 update-menu로 항목 수를 바꾸지 못한다(제목 등만 바뀐다). 그래서 변경이 있으면 트레이를 다시 띄운다.
+  // 짧은 시간의 연속 변경(플러그인이 연달아 로드될 때)은 한 번으로 묶는다.
+  // shortcut: 재시작 동안 아이콘이 잠깐 사라진다, 거슬리면 Linux 외 OS만 update-menu를 쓰거나 숨김 항목을 미리 만들어 둔다.
+  ctx.signal.on("shared:tray", () => {
+    if (scheduled) return;
+    scheduled = true;
+    ctx.timer.setTimeout(() => {
+      scheduled = false;
+      queue = queue.then(async () => {
+        await tray.kill(false);
+        tray = await start();
+      }).catch((e) => ctx.log.error("cannot refresh tray:", e));
+    }, 200);
   });
 
-  // shortcut: 변경마다 메뉴 전체를 다시 만든다, tray 항목이 수백 개로 늘면 디바운스.
-  ctx.signal.on("shared:tray", async () => {
-    const menu = await build();
-    const idMap = (tray as unknown as { internalIdMap: Map<number, MenuItem> }).internalIdMap;
-    for (const item of menu.items) idMap.set(((item as { __id?: number }).__id = nextId++), item);
-    await tray.sendAction({ type: "update-menu", menu });
-  });
-
-  return () => void tray.kill(false);
+  return async () => {
+    await queue;
+    await tray.kill(false);
+  };
 };
 export default plugin;
