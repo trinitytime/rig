@@ -15,7 +15,7 @@
     "test": "bun test",
     "bundle": "bun build packages/core/src/main.ts --target bun --outfile dist/rig.js",
     "clean": "rm -rf dist",
-    "dev": "tsc -b -w & node --watch dist/core/main.js",
+    "dev": "npm run dev -w @rig/core",
     "start": "node packages/launcher/launcher.mjs"
   },
   "devDependencies": {
