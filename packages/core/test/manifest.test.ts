@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { parseManifest, RIG_API_VERSION } from "../src/plugin/manifest.ts";
+import { parseManifest } from "../src/plugin/manifest.ts";
 
-const base = { id: "p", name: "P", version: RIG_API_VERSION };
+const base = { id: "p", name: "P", version: "2026-11-12" };
 
 test("entry는 플러그인 폴더 안의 상대경로 하나만 허용한다", () => {
   expect(parseManifest({ ...base, entry: "src/index.ts" }).entry).toBe("src/index.ts");
@@ -10,9 +10,9 @@ test("entry는 플러그인 폴더 안의 상대경로 하나만 허용한다", 
     expect(() => parseManifest({ ...base, entry: bad })).toThrow();
 });
 
-test("version은 호스트와 같은 YYYY-MM-DD 날짜여야 한다", () => {
-  expect(parseManifest(base).version).toBe(RIG_API_VERSION);
-  for (const bad of [1, "1", "2026-1-2", "2026-02-30", "2026-13-01", "2025-01-01", "20261112", ""])
+test("version은 실제로 있는 YYYY-MM-DD 날짜여야 한다", () => {
+  for (const ok of ["2026-11-12", "2020-02-29", "1999-01-01"]) expect(parseManifest({ ...base, version: ok }).version).toBe(ok);
+  for (const bad of [1, "1", "2026-1-2", "2026-02-30", "2026-13-01", "2025-02-29", "20261112", ""])
     expect(() => parseManifest({ ...base, version: bad })).toThrow();
   expect(() => parseManifest({ id: "p", name: "P" })).toThrow(); // 누락
 });
