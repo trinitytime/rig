@@ -15,7 +15,7 @@ const events: string[] = (globalThis as any).__rigEvents = [];
 function plugin(id: string, opts: { requires?: string[]; body?: string; entry?: string | false } = {}) {
   const dir = path.join(home, "plugins", "node_modules", id);
   fs.mkdirSync(dir, { recursive: true });
-  const manifest: Record<string, unknown> = { id, name: id, apiVersion: 1, requires: opts.requires ?? [] };
+  const manifest: Record<string, unknown> = { id, name: id, version: 1, requires: opts.requires ?? [] };
   if (opts.entry !== false) manifest.entry = opts.entry ?? "index.ts";
   fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
   fs.writeFileSync(

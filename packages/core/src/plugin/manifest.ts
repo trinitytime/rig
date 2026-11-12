@@ -17,7 +17,7 @@ const manifestSchema = z.object({
   id: pluginIdSchema,
   /** 표시용 이름. 자유롭게 쓸 수 있다. */
   name: z.string().min(1),
-  apiVersion: z.literal(RIG_API_VERSION, { error: `unsupported apiVersion (host supports ${RIG_API_VERSION})` }),
+  version: z.literal(RIG_API_VERSION, { error: `unsupported version (host supports ${RIG_API_VERSION})` }),
   /** 백엔드 엔트리 파일(.ts 또는 .js) 하나. manifest.json이 있는 폴더 기준 상대경로. UI 전용 플러그인은 생략한다. */
   entry: entrySchema.optional(),
   ui: z.object({ entry: z.string(), slot: z.string() }).optional(),

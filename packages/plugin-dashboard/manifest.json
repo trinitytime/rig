@@ -1,7 +1,7 @@
 {
   "id": "dashboard",
   "name": "Dashboard",
-  "apiVersion": 1,
+  "version": 1,
   "entry": "src/index.ts",
   "requires": [],
   "permissions": []
