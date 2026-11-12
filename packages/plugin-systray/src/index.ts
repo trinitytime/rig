@@ -1,7 +1,7 @@
 import { chmodSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
-import type { RigPlugin } from "@rig/core";
+import type { PluginContext, RigPlugin } from "@rig/core";
 import * as mod from "systray2";
 import type SysTrayType from "systray2";
 import type { MenuItem } from "systray2";
@@ -25,44 +25,47 @@ const trayIcons = { win32: "windows/rig-tray-dark.ico", darwin: "macos/rigTempla
 const iconFile = trayIcons[process.platform] ?? trayIcons.linux!;
 const icon = readFileSync(join(import.meta.dirname, "../../../assets/rig-icons/tray", iconFile)).toString("base64");
 
-const plugin: RigPlugin = async (ctx) => {
-  // systray2의 chmod('+x')가 실패해도 조용히 넘어가(특히 Bun) 실행 권한 없이 spawn되므로 직접 준다.
-  if (process.platform !== "win32") {
-    const bin = join(dirname(createRequire(import.meta.url).resolve("systray2")), "traybin", `tray_${process.platform === "darwin" ? "darwin" : "linux"}_release`);
-    chmodSync(bin, 0o755);
-  }
-  const build = async (signals: Map<MenuItem, string>) => {
-    const space = await ctx.shared.get("tray");
-    const items = Object.values(space)
-      .filter((v): v is TrayItem => {
-        if (!isTrayItem(v)) ctx.log.warn("ignored invalid tray value:", v);
-        return isTrayItem(v);
-      })
-      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
-      .map((t) => {
-        const item: MenuItem = { title: t.name, tooltip: t.name, enabled: true };
-        signals.set(item, t.signal);
-        return item;
-      });
-    return { icon, isTemplateIcon: process.platform === "darwin", title: "", tooltip: "rig", items };
-  };
+// systray2의 chmod('+x')가 실패해도 조용히 넘어가(특히 Bun) 실행 권한 없이 spawn되므로 직접 준다.
+const allowExec = () => {
+  if (process.platform === "win32") return;
+  const bin = join(dirname(createRequire(import.meta.url).resolve("systray2")), "traybin", `tray_${process.platform === "darwin" ? "darwin" : "linux"}_release`);
+  chmodSync(bin, 0o755);
+};
 
-  const start = async (menu: Awaited<ReturnType<typeof build>>, signals: Map<MenuItem, string>) => {
-    const tray = new SysTray({ menu });
-    await tray.ready(); // 프로세스가 뜬 뒤에야 이벤트를 붙일 수 있다.
-    tray.onError((e) => ctx.log.error("systray failed:", e));
-    void tray.onClick(({ item }) => {
-      const signal = signals.get(item);
-      if (!signal) return;
-      try {
-        ctx.signal.emit(signal);
-      } catch (e) {
-        ctx.log.error(`cannot emit "${signal}":`, e);
-      }
+const build = async (ctx: PluginContext, signals: Map<MenuItem, string>) => {
+  const space = await ctx.shared.get("tray");
+  const items = Object.values(space)
+    .filter((v): v is TrayItem => {
+      if (!isTrayItem(v)) ctx.log.warn("ignored invalid tray value:", v);
+      return isTrayItem(v);
+    })
+    .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
+    .map((t) => {
+      const item: MenuItem = { title: t.name, tooltip: t.name, enabled: true };
+      signals.set(item, t.signal);
+      return item;
     });
-    return tray;
-  };
+  return { icon, isTemplateIcon: process.platform === "darwin", title: "", tooltip: "rig", items };
+};
 
+const start = async (ctx: PluginContext, menu: Awaited<ReturnType<typeof build>>, signals: Map<MenuItem, string>) => {
+  const tray = new SysTray({ menu });
+  await tray.ready(); // 프로세스가 뜬 뒤에야 이벤트를 붙일 수 있다.
+  tray.onError((e) => ctx.log.error("systray failed:", e));
+  void tray.onClick(({ item }) => {
+    const signal = signals.get(item);
+    if (!signal) return;
+    try {
+      ctx.signal.emit(signal);
+    } catch (e) {
+      ctx.log.error(`cannot emit "${signal}":`, e);
+    }
+  });
+  return tray;
+};
+
+const plugin: RigPlugin = async (ctx) => {
+  allowExec();
   let tray: InstanceType<typeof SysTray> | undefined;
   let queue: Promise<unknown> = Promise.resolve();
   let cancel: (() => void) | undefined;
@@ -72,11 +75,11 @@ const plugin: RigPlugin = async (ctx) => {
   // shortcut: 재시작 동안 아이콘이 잠깐 사라진다, 거슬리면 Linux 외 OS만 update-menu를 쓰거나 숨김 항목을 미리 만들어 둔다.
   const refresh = async () => {
     const signals = new Map<MenuItem, string>();
-    const menu = await build(signals);
+    const menu = await build(ctx, signals);
     if (menu.items.length === 0) return;
     await tray?.kill(false);
     tray = undefined;
-    tray = await start(menu, signals);
+    tray = await start(ctx, menu, signals);
   };
 
   const schedule = () => {
