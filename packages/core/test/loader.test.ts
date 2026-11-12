@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { PluginLoader } from "../src/plugin/loader.ts";
+import { RIG_API_VERSION } from "../src/plugin/manifest.ts";
 
 // <RIG_HOME>/plugins/node_modules/ 아래에 시험용 플러그인을 만들어 loadAll을 돌린다 (내장 플러그인은 같이 로드되지만 무시한다).
 const home = fs.mkdtempSync(path.join(os.tmpdir(), "rig-loader-"));
@@ -15,7 +16,7 @@ const events: string[] = (globalThis as any).__rigEvents = [];
 function plugin(id: string, opts: { requires?: string[]; body?: string; entry?: string | false } = {}) {
   const dir = path.join(home, "plugins", "node_modules", id);
   fs.mkdirSync(dir, { recursive: true });
-  const manifest: Record<string, unknown> = { id, name: id, version: 1, requires: opts.requires ?? [] };
+  const manifest: Record<string, unknown> = { id, name: id, version: RIG_API_VERSION, requires: opts.requires ?? [] };
   if (opts.entry !== false) manifest.entry = opts.entry ?? "index.ts";
   fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
   fs.writeFileSync(

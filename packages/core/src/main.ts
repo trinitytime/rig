@@ -21,3 +21,4 @@ loader.signals.on("core:exit", () => shutdown(), console);
 server = await startServer({ loader });
 const statuses = await loader.loadAll();
 for (const s of statuses) console.log(`[rig] plugin ${s.id}: ${s.state}${s.error ? ` (${s.error})` : ""}`);
+ 
