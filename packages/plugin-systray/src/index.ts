@@ -29,6 +29,9 @@ const plugin: RigPlugin = async (ctx) => {
     chmodSync(bin, 0o755);
   }
   const signals = new Map<MenuItem, string>();
+  // systray2는 update-menu 때 새 항목에 __id를 주지 않아 클릭이 undefined로 오고 예외가 난다. 처음 메뉴는 생성자가 1..n을 주므로 그 뒤 번호를 직접 부여한다.
+  // shortcut: private 필드(internalIdMap)에 직접 접근한다, systray2를 올리면 확인.
+  let nextId = 1_000_000;
 
   const build = async () => {
     const space = await ctx.shared.get("tray");
@@ -62,7 +65,10 @@ const plugin: RigPlugin = async (ctx) => {
 
   // shortcut: 변경마다 메뉴 전체를 다시 만든다, tray 항목이 수백 개로 늘면 디바운스.
   ctx.signal.on("shared:tray", async () => {
-    await tray.sendAction({ type: "update-menu", menu: await build() });
+    const menu = await build();
+    const idMap = (tray as unknown as { internalIdMap: Map<number, MenuItem> }).internalIdMap;
+    for (const item of menu.items) idMap.set(((item as { __id?: number }).__id = nextId++), item);
+    await tray.sendAction({ type: "update-menu", menu });
   });
 
   return () => void tray.kill(false);
