@@ -6,11 +6,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-const bunBin = join(root, "node_modules", ".bin", process.platform === "win32" ? "bun.cmd" : "bun");
+// .bin/bun.cmd 대신 실제 실행 파일을 쓴다: Windows에서 .cmd를 shell 없이 spawn하면 EINVAL이다 (모든 플랫폼에서 bun 패키지의 bin/bun.exe가 실제 바이너리다).
+const bunBin = join(root, "node_modules", "bun", "bin", "bun.exe");
 
 function run(cmd, args) {
-  // Windows에서는 npm이 .cmd라서 shell이 필요하다.
-  const r = spawnSync(cmd, args, { cwd: root, stdio: "inherit", shell: process.platform === "win32" });
+  // Windows에서는 npm이 .cmd라서 npm만 shell이 필요하다 (경로에 공백이 있는 node는 shell을 거치면 깨진다).
+  const r = spawnSync(cmd, args, { cwd: root, stdio: "inherit", shell: process.platform === "win32" && cmd === "npm" });
   if (r.error) {
     console.error(r.error.code === "ENOENT" ? `${cmd}을(를) 찾을 수 없습니다. (bun은 core의 의존성으로 node_modules에 설치됩니다)` : r.error.message);
     process.exit(1);
