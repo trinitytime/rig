@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc -b && tsc -p tsconfig.plugins.json",
+    "typecheck": "npm run build:type -w @rig/core && tsc -b && tsc -p tsconfig.plugins.json",
     "test": "bun test",
     "bundle": "bun build packages/core/src/main.ts --target bun --outfile dist/rig.js",
     "clean": "rm -rf dist",

@@ -10,8 +10,9 @@
   "scripts": {
     "dev": "bun --no-install --watch run src/main.ts",
     "build": "tsc -b",
+    "build:type": "tsc --ignoreConfig src/plugin/plugin.ts --declaration --emitDeclarationOnly --outDir ../../dist/types --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
     "typecheck": "tsc -b",
-    "clean": "rm -rf ../../dist/core",
+    "clean": "rm -rf ../../dist/core ../../dist/types",
     "start": "node ../../dist/core/main.js"
   },
   "dependencies": {
