@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Hono } from "hono";
@@ -6,7 +7,8 @@ import { Shell } from "./render.tsx";
 
 // 타입만 import한다: 플러그인은 런타임에 @rig/core를 import하지 않는다.
 const BASE = "/dashboard/"; // 코어가 접두사를 떼므로 서버는 알 수 없어서, 링크용으로 고정해 둔다.
-const read = (f: string) => readFileSync(join(import.meta.dirname, f), "utf8");
+const DASHBOARD_URL = "http://localhost:7440/dashboard";
+const read =(f: string) => readFileSync(join(import.meta.dirname, f), "utf8");
 const name = /^[A-Za-z0-9_.-]{1,64}$/;
 
 const plugin: RigPlugin = (ctx) => {
@@ -77,6 +79,16 @@ const plugin: RigPlugin = (ctx) => {
   });
 
   ctx.http.fetch((req) => app.fetch(req));
+
+  // 기본 브라우저로 대시보드를 연다. 플러그인은 코어의 포트 상수를 import하지 않으므로 주소를 고정해 둔다.
+  ctx.signal.on("dashboard:open", () => {
+    const [cmd, ...args] =
+      process.platform === "win32" ? ["cmd", "/c", "start", "", DASHBOARD_URL] : process.platform === "darwin" ? ["open", DASHBOARD_URL] : ["xdg-open", DASHBOARD_URL];
+    spawn(cmd!, args, { stdio: "ignore", detached: true })
+      .on("error", (e) => ctx.log.error("cannot open browser:", e))
+      .unref();
+  });
+
   return () => {
     for (const c of clients) c.close();
     clients.clear();
