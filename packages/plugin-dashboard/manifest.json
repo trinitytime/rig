@@ -1,6 +1,6 @@
 {
   "id": "dashboard",
-  "name": "dashboard",
+  "name": "Dashboard",
   "apiVersion": 1,
   "entry": "src/index.ts",
   "requires": [],
