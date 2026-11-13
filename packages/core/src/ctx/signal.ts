@@ -41,7 +41,7 @@ export class SignalBus {
 /** ctx.signal. 플러그인이 emit한 이름 그대로 모든 구독자에게 전달된다. */
 export function createSignal(bus: SignalBus, track: Track, log: PluginLogger): PluginSignal {
   const signal: PluginSignal = {
-    on: (name, fn) => track(bus.on(signalName.parse(name), fn, log)),
+    on: (name, fn) => track(bus.on(signalName.parse(name), fn, log), true),
     emit(name, payload) {
       signalName.parse(name)
       if (RESERVED_PREFIXES.some((p) => name.startsWith(p))) throw new Error(`"${name}" is reserved for the core`)

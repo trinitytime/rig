@@ -9,7 +9,7 @@ import { createSignal, SignalBus } from '../ctx/signal.ts'
 import { createShared, SharedMemory } from '../ctx/shared.ts'
 import { createStorage } from '../ctx/storage.ts'
 import { createTimer } from '../ctx/timer.ts'
-import { Ownership } from '../ctx/ownership.ts'
+import { Ownership, type Track } from '../ctx/ownership.ts'
 import { createService, ServiceRegistry } from '../ctx/services.ts'
 
 export type PluginState = 'active' | 'failed' | 'skipped'
@@ -137,7 +137,7 @@ export class PluginLoader {
     const dataDir = path.join(rigHome(), 'data', id)
     fs.mkdirSync(dataDir, { recursive: true })
     // id는 클로저로만 존재한다. ctx에는 id를 읽을 수 있는 속성이 없다.
-    const track = (dispose: () => void) => this.owned.track(id, dispose)
+    const track: Track = (dispose, first) => this.owned.track(id, dispose, first)
     return Object.freeze({
       log: Object.freeze(log),
       dataDir,
