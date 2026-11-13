@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { Hono } from 'hono'
 import type { RigPlugin } from '@rig/core'
 import { Shell } from './render.tsx'
+import { pluginsPage } from './plugins-page.ts'
 
 // 타입만 import한다: 플러그인은 런타임에 @rig/core를 import하지 않는다.
 // 코어가 접두사를 떼므로 서버는 자기 주소를 모른다. 링크는 코어가 shared "http"에 알린 host/port로 만든다.
@@ -88,6 +89,8 @@ const plugin: RigPlugin = (ctx) => {
   ctx.shared
     .set('http', '/', '/dashboard') // 코어가 / 요청을 이 주소로 보낸다
     .catch((e) => ctx.log.error('cannot set home page:', e))
+  ctx.shared.set('ui', 'plugins', pluginsPage).catch((e) => ctx.log.error('cannot set plugins page:', e))
+
   ctx.shared
     .set('tray', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
     .catch((e) => ctx.log.error('cannot add tray item:', e))
