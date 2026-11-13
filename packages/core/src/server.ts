@@ -7,7 +7,7 @@ import { hostGuard, mergeAllowedHosts } from './security.ts'
 /** 기본 포트. 전화 키패드로 R-I-G = 7-4-4 (+0). 흔한 개발 포트(3000/5173/8080)와 겹치지 않음. */
 export const DEFAULT_PORT = 7440
 /** 보안상 로컬 루프백에만 바인딩한다. */
-export const DEFAULT_HOST = '127.0.0.1'
+export const DEFAULT_HOST = 'localhost'
 
 const portSchema = z.coerce.number().int().min(1).max(65535)
 
