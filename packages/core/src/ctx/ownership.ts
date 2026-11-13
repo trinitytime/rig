@@ -15,7 +15,7 @@ export class Ownership {
     const set = this.owned.get(id)
     if (!set) {
       dispose()
-      throw new Error('plugin is not active')
+      throw new Error(`plugin "${id}" is not active`)
     }
     set.add(dispose)
     return () => {
