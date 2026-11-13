@@ -3,13 +3,15 @@ import { Badge } from './components/Badge.tsx'
 import { ButtonRow } from './components/ButtonRow.tsx'
 import { InputRow } from './components/InputRow.tsx'
 import { ListRow } from './components/ListRow.tsx'
+import { Page } from './components/Page.tsx'
 import { Panel } from './components/Panel.tsx'
 import { SelectRow } from './components/SelectRow.tsx'
 import { TableRow } from './components/TableRow.tsx'
 import { Divider, Heading, Text } from './components/Text.tsx'
+import { Side } from './components/Side.tsx'
 import { TextareaRow } from './components/TextareaRow.tsx'
 import { ToggleRow } from './components/ToggleRow.tsx'
-import { arr, obj, str, type Obj } from './components/util.ts'
+import { arr, obj, str, type Obj, type PageEntry } from './components/util.ts'
 
 // 선언형 화면 JSON(shared "ui" 공간의 값)을 HTML로 그린다. 값은 모두 외부 입력이라 문자열로 바꿔 쓰고, hono가 이스케이프한다.
 // shortcut: 스키마를 zod로 검증하지 않고 모르는 type은 건너뛴다, 플러그인이 늘어 오류 안내가 필요해지면 검증을 추가.
@@ -56,7 +58,7 @@ const Item = ({ it: raw, k }: { it: unknown; k: string }) => {
   }
 }
 
-export type PageEntry = { key: string; title: string }
+export type { PageEntry }
 
 /** shared "ui" 공간에서 화면 목록을 뽑는다. items 배열이 있는 값만 화면으로 본다. */
 export function pageList(space: Obj): PageEntry[] {
@@ -70,7 +72,6 @@ export const Shell = ({ base, space, current }: { base: string; space: Obj; curr
   const pages = pageList(space)
   const key = pages.find((p) => p.key === current)?.key ?? pages[0]?.key
   const page = key ? obj(space[key]) : {}
-  const status = obj(page.status)
   return (
     <html lang="ko">
       <head>
@@ -80,44 +81,12 @@ export const Shell = ({ base, space, current }: { base: string; space: Obj; curr
         <link rel="stylesheet" href={`${base}rig-ui.css`} />
       </head>
       <body class="rig-shell" data-page={key} data-base={base}>
-        <aside class="rig-side">
-          <h2 class="rig-side-title">Rig</h2>
-          <nav aria-label="화면 목록">
-            <ul class="rig-nav-list">
-              {pages.map((p) => (
-                <li>
-                  <a
-                    class="rig-nav-item"
-                    href={`${base}?p=${encodeURIComponent(p.key)}`}
-                    aria-current={p.key === key ? 'page' : undefined}
-                  >
-                    {p.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </aside>
-        <main class="rig-page">
-          {key ? (
-            <>
-              <header data-k="h" style="display:grid;gap:4px">
-                <div class="rig-actions" style="justify-content:space-between;align-items:center">
-                  <h1 class="rig-heading">{str(page.title) || key}</h1>
-                  {status.text ? <Badge b={status} /> : null}
-                </div>
-                {page.description ? <p class="rig-text rig-text--muted">{str(page.description)}</p> : null}
-              </header>
-              {arr(page.items).map((it, i) => (
-                <Item it={it} k={String(i)} />
-              ))}
-            </>
-          ) : (
-            <p class="rig-text rig-text--muted" data-k="empty">
-              표시할 화면이 없습니다.
-            </p>
-          )}
-        </main>
+        <Side base={base} pages={pages} current={key} />
+        <Page pageKey={key} page={page}>
+          {arr(page.items).map((it, i) => (
+            <Item it={it} k={String(i)} />
+          ))}
+        </Page>
         <script src={`${base}client.js`} defer></script>
       </body>
     </html>

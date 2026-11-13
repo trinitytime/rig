@@ -17,3 +17,5 @@ export const controlProps = (it: Obj, k: string) => {
 }
 
 export type ItemProps = { it: Obj; k: string }
+
+export type PageEntry = { key: string; title: string }
