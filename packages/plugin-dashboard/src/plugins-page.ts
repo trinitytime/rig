@@ -11,14 +11,19 @@ const plugins = [
 export const pluginsPage = {
   title: 'Plugins',
   description: '설치된 플러그인을 켜고 끕니다.',
+  status: { text: `${plugins.filter((p) => p.active).length}/${plugins.length} 활성`, tone: 'success' },
   items: [
-    { type: 'heading', text: `플러그인 ${plugins.length}개`, level: 3 },
-    ...plugins.map((p) => ({
-      type: 'toggle',
-      id: `toggle-${p.id}`,
-      label: p.name,
-      description: p.description,
-      value: p.active,
-    })),
+    {
+      type: 'section',
+      title: '설치된 플러그인',
+      description: `플러그인 ${plugins.length}개`,
+      items: plugins.map((p) => ({
+        type: 'toggle',
+        id: `toggle-${p.id}`,
+        label: p.name,
+        description: p.description,
+        value: p.active,
+      })),
+    },
   ],
 }
