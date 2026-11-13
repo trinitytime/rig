@@ -1,6 +1,8 @@
 // 대시보드 클라이언트: 컨트롤 이벤트를 서버로 보내고, 서버가 알리면 화면을 다시 받아 바뀐 부분만 교체한다.
 (() => {
-  const { page, base } = document.body.dataset;
+  const { page } = document.body.dataset;
+  // base는 다른 호스트 표기(localhost와 127.0.0.1)일 수 있어서, fetch와 EventSource는 현재 출처의 경로만 쓴다 (교차 출처면 CORS로 막힌다).
+  const base = new URL(document.body.dataset.base, location.href).pathname;
   const leaves = (root) => [...root.querySelectorAll("[data-k]")];
 
   const post = (id, value) =>

@@ -6,7 +6,8 @@ import type { RigPlugin } from "@rig/core";
 import { Shell } from "./render.tsx";
 
 // 타입만 import한다: 플러그인은 런타임에 @rig/core를 import하지 않는다.
-const BASE = "/dashboard/"; // 코어가 접두사를 떼므로 서버는 알 수 없어서, 링크용으로 고정해 둔다.
+// 코어가 접두사를 떼므로 서버는 자기 주소를 모른다. 링크는 코어가 shared "http"에 알린 host/port로 만든다.
+const PATH = "/dashboard/";
 const DASHBOARD_URL = "http://localhost:7440/dashboard";
 const read =(f: string) => readFileSync(join(import.meta.dirname, f), "utf8");
 const name = /^[A-Za-z0-9_.-]{1,64}$/;
@@ -43,7 +44,9 @@ const plugin: RigPlugin = (ctx) => {
 
   app.get("/", async (c) => {
     const space = await ctx.shared.get<Record<string, unknown>>("ui");
-    return c.html("<!doctype html>" + (await Shell({ base: BASE, space, current: c.req.query("p") }).toString()));
+    const { host, port } = await ctx.shared.get<{ host?: string; port?: number }>("http");
+    const base = host && port ? `http://${host}:${port}${PATH}` : PATH;
+    return c.html("<!doctype html>" + (await Shell({ base, space, current: c.req.query("p") }).toString()));
   });
   app.get("/rig-ui.css", () => text(css, "text/css"));
   app.get("/client.js", () => text(js, "text/javascript"));
