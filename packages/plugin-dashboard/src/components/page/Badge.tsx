@@ -1,5 +1,5 @@
 /** @jsxImportSource hono/jsx */
-import { str, type Obj } from './util.ts'
+import { str, type Obj } from '../util.ts'
 
 const tone = (v: unknown) => (['success', 'warning', 'danger'].includes(str(v)) ? ` rig-badge--${str(v)}` : '')
 

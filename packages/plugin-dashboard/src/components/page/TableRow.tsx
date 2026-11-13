@@ -1,6 +1,6 @@
 /** @jsxImportSource hono/jsx */
 import { Row } from './Row.tsx'
-import { arr, str, type ItemProps } from './util.ts'
+import { arr, str, type ItemProps } from '../util.ts'
 
 export const TableRow = ({ it, k }: ItemProps) => (
   <Row k={k} it={it} block>

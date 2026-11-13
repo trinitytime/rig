@@ -1,7 +1,7 @@
 /** @jsxImportSource hono/jsx */
 import { Badge } from './Badge.tsx'
 import { Row } from './Row.tsx'
-import { arr, obj, str, type ItemProps } from './util.ts'
+import { arr, obj, str, type ItemProps } from '../util.ts'
 
 export const ListRow = ({ it, k }: ItemProps) => (
   <Row k={k} it={it} block>

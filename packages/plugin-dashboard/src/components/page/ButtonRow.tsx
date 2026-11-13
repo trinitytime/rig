@@ -1,6 +1,6 @@
 /** @jsxImportSource hono/jsx */
 import { Row } from './Row.tsx'
-import { controlProps, str, type ItemProps } from './util.ts'
+import { controlProps, str, type ItemProps } from '../util.ts'
 
 export const ButtonRow = ({ it, k }: ItemProps) => {
   const { ev, disabled } = controlProps(it, k)

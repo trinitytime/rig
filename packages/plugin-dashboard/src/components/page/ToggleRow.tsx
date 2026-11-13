@@ -1,6 +1,6 @@
 /** @jsxImportSource hono/jsx */
 import { Field, Row } from './Row.tsx'
-import { controlProps, type ItemProps } from './util.ts'
+import { controlProps, type ItemProps } from '../util.ts'
 
 export const ToggleRow = ({ it, k }: ItemProps) => {
   const { id, ev, disabled, invalid } = controlProps(it, k)

@@ -1,6 +1,6 @@
 /** @jsxImportSource hono/jsx */
 import type { Child } from 'hono/jsx'
-import { str, type Obj } from './util.ts'
+import { str, type Obj } from '../util.ts'
 
 type RowProps = { k: string; it: Obj; block?: boolean; labelFor?: string; children: Child }
 

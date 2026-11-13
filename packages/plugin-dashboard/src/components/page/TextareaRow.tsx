@@ -1,6 +1,6 @@
 /** @jsxImportSource hono/jsx */
 import { Field, Row } from './Row.tsx'
-import { controlProps, str, type ItemProps } from './util.ts'
+import { controlProps, str, type ItemProps } from '../util.ts'
 
 export const TextareaRow = ({ it, k }: ItemProps) => {
   const { id, ev, disabled, invalid } = controlProps(it, k)

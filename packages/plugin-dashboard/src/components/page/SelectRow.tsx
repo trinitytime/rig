@@ -1,6 +1,6 @@
 /** @jsxImportSource hono/jsx */
 import { Field, Row } from './Row.tsx'
-import { arr, controlProps, obj, str, type ItemProps } from './util.ts'
+import { arr, controlProps, obj, str, type ItemProps } from '../util.ts'
 
 export const SelectRow = ({ it, k }: ItemProps) => {
   const { id, ev, disabled, invalid } = controlProps(it, k)

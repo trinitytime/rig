@@ -1,5 +1,5 @@
 /** @jsxImportSource hono/jsx */
-import { str, type ItemProps } from './util.ts'
+import { str, type ItemProps } from '../util.ts'
 
 export const Heading = ({ it, k }: ItemProps) =>
   it.level === 3 ? (
