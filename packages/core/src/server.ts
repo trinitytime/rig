@@ -30,7 +30,12 @@ export function createApp(loader?: PluginLoader, opts: { port?: number } = {}): 
     '*',
     hostGuard(() => allowed, opts.port),
   )
-  app.get('/', (c) => c.html('<!doctype html><title>Rig</title><div id="rig-shell"></div>'))
+  app.get('/', (c) => {
+    const to = loader?.shared.get('http', '/') // 플러그인이 정한 첫 화면. 없으면 기본 화면.
+    return typeof to === 'string' && to
+      ? c.redirect(to)
+      : c.html('<!doctype html><title>Rig</title><div id="rig-shell"></div>')
+  })
   app.get('/health', (c) => c.json({ ok: true, name: 'rig' }))
   app.get('/api/plugins', (c) => c.json(loader?.list() ?? []))
   if (loader) app.all('/:plugin/*', (c) => loader.http.handle(c.req.param('plugin'), c.req.raw))
