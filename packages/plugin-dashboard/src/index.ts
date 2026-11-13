@@ -86,6 +86,9 @@ const plugin: RigPlugin = (ctx) => {
   ctx.http.fetch((req) => app.fetch(req))
 
   ctx.shared
+    .set('http', '/', '/dashboard') // 코어가 / 요청을 이 주소로 보낸다
+    .catch((e) => ctx.log.error('cannot set home page:', e))
+  ctx.shared
     .set('tray', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
     .catch((e) => ctx.log.error('cannot add tray item:', e))
 
