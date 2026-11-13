@@ -3,6 +3,8 @@ import type { PluginShared } from '../plugin/plugin.ts'
 import type { Track } from './ownership.ts'
 
 const name = z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/, "must be 1-64 chars of letters, digits, '.', '-' or '_'")
+// key는 "/"도 허용한다 (http 공간의 첫 화면 주소용).
+const keySchema = name.or(z.literal('/'))
 const json = z.json().optional()
 
 type Entry = { owner: string; value: unknown; off?: () => void }
@@ -73,13 +75,13 @@ export class SharedMemory {
 export function createShared(mem: SharedMemory, id: string, track: Track): PluginShared {
   const shared: PluginShared = {
     async set(ws, key, value) {
-      mem.set(id, name.parse(ws), name.parse(key), json.parse(value), track)
+      mem.set(id, name.parse(ws), keySchema.parse(key), json.parse(value), track)
     },
     async get(ws: string, key?: string) {
-      return mem.get(name.parse(ws), key === undefined ? undefined : name.parse(key)) as never
+      return mem.get(name.parse(ws), key === undefined ? undefined : keySchema.parse(key)) as never
     },
     async delete(ws, key) {
-      mem.delete(id, name.parse(ws), name.parse(key))
+      mem.delete(id, name.parse(ws), keySchema.parse(key))
     },
   }
   return Object.freeze(shared)
