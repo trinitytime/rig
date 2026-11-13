@@ -1,13 +1,18 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
 import type { PluginLoader } from './plugin/loader.ts'
 import { z } from 'zod'
 import { hostGuard, mergeAllowedHosts } from './security.ts'
+import { REPO_ROOT } from './paths.ts'
 
 /** 기본 포트. 전화 키패드로 R-I-G = 7-4-4 (+0). 흔한 개발 포트(3000/5173/8080)와 겹치지 않음. */
 export const DEFAULT_PORT = 7440
 /** 보안상 로컬 루프백에만 바인딩한다. */
 export const DEFAULT_HOST = 'localhost'
+
+const FAVICON = path.join(REPO_ROOT, 'assets/rig-icons/web/favicon.ico')
 
 const portSchema = z.coerce.number().int().min(1).max(65535)
 
@@ -36,6 +41,9 @@ export function createApp(loader?: PluginLoader, opts: { port?: number } = {}): 
       ? c.redirect(to)
       : c.html('<!doctype html><title>Rig</title><div id="rig-shell"></div>')
   })
+  app.get('/favicon.ico', async (c) =>
+    c.body(await readFile(FAVICON), 200, { 'content-type': 'image/x-icon', 'cache-control': 'max-age=86400' }),
+  )
   app.get('/health', (c) => c.json({ ok: true, name: 'rig' }))
   app.get('/api/plugins', (c) => c.json(loader?.list() ?? []))
   if (loader) app.all('/:plugin/*', (c) => loader.http.handle(c.req.param('plugin'), c.req.raw))
