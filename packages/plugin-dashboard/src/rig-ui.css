@@ -70,6 +70,7 @@
   margin: 0 auto;
   padding: var(--space-6) var(--space-5);
   display: grid;
+  align-content: start; /* 창이 높아져도 행이 늘어나지 않고 위에서부터 쌓는다 */
   gap: var(--space-5);
   background: var(--bg);
   color: var(--fg);
