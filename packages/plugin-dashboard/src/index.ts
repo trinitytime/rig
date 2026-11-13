@@ -53,7 +53,7 @@ const plugin: RigPlugin = (ctx) => {
   app.get('/rig-ui.css', () => text(css, 'text/css'))
   app.get('/client.js', () => text(js, 'text/javascript'))
 
-  app.get('/events', (c) => {
+  app.get('/events', () => {
     let self: ReadableStreamDefaultController<string>
     const stream = new ReadableStream<string>({
       start(controller) {
