@@ -35,7 +35,7 @@ const installedFile = () => path.join(rigHome(), 'data', 'core', 'installed-plug
 
 /**
  * 목록 파일이 있으면 그것만 읽고 설정 파일의 plugins는 무시한다.
- * 없으면 플러그인을 탐색해 목록을 만들고(활성 여부는 설정 파일의 plugins, 적혀 있지 않으면 활성) 파일로 저장한다.
+ * 없으면 플러그인을 탐색해 목록을 만들고(활성 여부는 설정 파일의 plugins, 적혀 있지 않으면 비활성) 파일로 저장한다.
  */
 export function loadInstalled(config: Config): InstalledPlugins {
   const file = installedFile()
@@ -47,7 +47,7 @@ export function loadInstalled(config: Config): InstalledPlugins {
     }
   }
   const list: InstalledPlugins = discoverPlugins().plugins.flatMap((p) =>
-    p.source === 'custom' ? [] : [{ id: p.manifest.id, source: p.source, enabled: config.plugins?.[p.manifest.id] ?? true }],
+    p.source === 'custom' ? [] : [{ id: p.manifest.id, source: p.source, enabled: config.plugins?.[p.manifest.id] ?? false }],
   )
   fs.mkdirSync(path.dirname(file), { recursive: true })
   fs.writeFileSync(file, JSON.stringify(list, null, 2))

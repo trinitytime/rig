@@ -29,7 +29,7 @@ test("설정 파일이 없으면 빈 설정이고, 잘못되면 던진다", () =
 test("목록 파일이 없으면 탐색해 만들고 설정의 활성 여부를 적용해 저장한다. 있으면 설정은 무시한다", () => {
   const list = loadInstalled({ plugins: { systray: false } });
   expect(list.find((p) => p.id === "systray")).toEqual({ id: "systray", source: "builtin", enabled: false });
-  expect(list.find((p) => p.id === "dashboard")?.enabled).toBe(true); // 적혀 있지 않으면 활성
+  expect(list.find((p) => p.id === "dashboard")?.enabled).toBe(false); // 적혀 있지 않으면 비활성
   expect(fs.existsSync(path.join(home, "data", "core", "installed-plugins.json"))).toBe(true);
   expect(loadInstalled({ plugins: { systray: true } }).find((p) => p.id === "systray")?.enabled).toBe(false);
 });
