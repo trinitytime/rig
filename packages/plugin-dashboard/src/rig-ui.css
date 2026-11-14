@@ -157,7 +157,9 @@ h2.rig-heading, h3.rig-heading { font-size: var(--text-lg); }
 .rig-row + .rig-row { border-top: 1px solid var(--border); }
 
 .rig-row-info { display: grid; gap: 2px; min-width: 0; }
+.rig-row-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); }
 .rig-row-label { font-weight: 500; }
+.rig-row-meta { color: var(--muted); font-size: var(--text-sm); }
 .rig-row-desc { margin: 0; color: var(--muted); font-size: var(--text-sm); text-wrap: pretty; }
 
 .rig-row-control {

@@ -4,17 +4,20 @@ import { str, type Obj } from '../util.ts'
 
 type RowProps = { k: string; it: Obj; block?: boolean; labelFor?: string; children: Child }
 
-/** 설정 한 줄: 왼쪽에 라벨과 설명, 오른쪽에 컨트롤. */
+/** 설정 한 줄: 왼쪽에 라벨(옆에 부연 meta)과 설명, 오른쪽에 컨트롤. */
 export const Row = ({ k, it, block, labelFor, children }: RowProps) => (
   <div class={`rig-row${block ? ' rig-row--block' : ''}`} data-k={k}>
     <div class="rig-row-info">
-      {labelFor ? (
-        <label class="rig-row-label" for={labelFor}>
-          {str(it.label)}
-        </label>
-      ) : (
-        <span class="rig-row-label">{str(it.label)}</span>
-      )}
+      <div class="rig-row-head">
+        {labelFor ? (
+          <label class="rig-row-label" for={labelFor}>
+            {str(it.label)}
+          </label>
+        ) : (
+          <span class="rig-row-label">{str(it.label)}</span>
+        )}
+        {it.meta ? <span class="rig-row-meta">{str(it.meta)}</span> : null}
+      </div>
       {it.description ? <p class="rig-row-desc">{str(it.description)}</p> : null}
     </div>
     <div class="rig-row-control">{children}</div>
