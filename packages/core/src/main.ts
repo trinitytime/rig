@@ -20,7 +20,7 @@ function init(loader: PluginLoader, config: Config, getServer: () => Server | un
 
   loader.shared.set(
     'core',
-    'dashboard:menu',
+    'tray:menu',
     'exit',
     { id: 'exit', name: 'Exit', signal: 'core:exit', order: 9999 },
     () => () => {},

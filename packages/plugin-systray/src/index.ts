@@ -41,7 +41,7 @@ const allowExec = () => {
 }
 
 const build = async (ctx: PluginContext, signals: Map<MenuItem, string>) => {
-  const space = await ctx.shared.get('dashboard:menu')
+  const space = await ctx.shared.get('tray:menu')
   const items = Object.values(space)
     .flatMap((v) => {
       const r = trayItem.safeParse(v)
@@ -95,7 +95,7 @@ const plugin: RigPlugin = async (ctx) => {
     queue = queue.then(refresh).catch((e) => ctx.log.error('cannot refresh tray:', e))
   }, SETTLE_MS)
   schedule() // 초기화 후 SETTLE_MS 동안 신호가 없으면 처음 구성한다
-  ctx.signal.on('shared:dashboard:menu', schedule)
+  ctx.signal.on('shared:tray:menu', schedule)
 
   return async () => {
     await queue

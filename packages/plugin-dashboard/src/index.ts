@@ -89,7 +89,7 @@ const plugin: RigPlugin = (ctx) => {
   ctx.shared.set('dashboard:page', 'plugins', pluginsPage).catch((e) => ctx.log.error('cannot set plugins page:', e))
 
   ctx.shared
-    .set('dashboard:menu', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
+    .set('tray:menu', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
     .catch((e) => ctx.log.error('cannot add tray item:', e))
 
   // 기본 브라우저로 대시보드를 연다. 주소는 코어가 shared "http"에 알린 host/port로 만든다.
