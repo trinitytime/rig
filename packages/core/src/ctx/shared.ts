@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { PluginShared } from '../plugin/plugin.ts'
 import type { Track } from './ownership.ts'
 
-const name = z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/, "must be 1-64 chars of letters, digits, '.', '-' or '_'")
+const name = z.string().regex(/^[A-Za-z0-9_.:-]{1,64}$/, "must be 1-64 chars of letters, digits, '.', ':', '-' or '_'")
 // key는 "/"도 허용한다 (http 공간의 첫 화면 주소용).
 const keySchema = name.or(z.literal('/'))
 const json = z.json().optional()

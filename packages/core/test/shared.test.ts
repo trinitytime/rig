@@ -66,6 +66,14 @@ test("잘못된 이름과 JSON이 아닌 값은 거부한다", async () => {
   await expect(a.set("ws", "k", () => {})).rejects.toThrow();
 });
 
+test("이름에 ':'와 '.'를 쓸 수 있다", async () => {
+  const a = plugin(new SharedMemory(noEmit), new Ownership(), "a");
+  await a.set("dashboard:menu", "k", 1);
+  await a.set("dashboard.menu", "k", 2);
+  expect(await a.get("dashboard:menu", "k")).toBe(1);
+  expect(await a.get("dashboard.menu", "k")).toBe(2);
+});
+
 test("변경이 생기면 shared:<workspace> 신호를 보낸다 (set, delete, null 쓰기, 소유자 비활성화)", async () => {
   const sent: [string, unknown][] = [];
   const mem = new SharedMemory((s, p) => sent.push([s, p]));
