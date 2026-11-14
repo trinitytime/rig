@@ -37,6 +37,13 @@ export function createTimer(track: Track, log: PluginLogger): PluginTimer {
       }, intervalSchema.parse(interval));
       return track(() => clearInterval(t));
     },
+    debounce(fn, delay) {
+      let cancel: (() => void) | undefined;
+      return () => {
+        cancel?.();
+        cancel = timer.setTimeout(fn, delay);
+      };
+    },
   };
   return Object.freeze(timer);
 }

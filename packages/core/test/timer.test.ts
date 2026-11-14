@@ -30,3 +30,16 @@ test("콜백 예외는 던지지 않고, 잘못된 인자는 거부한다", asyn
   expect(() => timer.setInterval(() => {}, 1)).toThrow();
   expect(() => timer.setTimeout(() => {}, -1)).toThrow();
 });
+
+test("debounce는 연속 호출을 마지막 호출 뒤 한 번으로 묶고, release 뒤에는 실행하지 않는다", async () => {
+  const { o, timer } = setup();
+  let n = 0;
+  const d = timer.debounce(() => { n++; }, 30);
+  d(); await sleep(15); d(); await sleep(15); d();
+  expect(n).toBe(0);
+  await sleep(50);
+  expect(n).toBe(1);
+  d(); o.release("p");
+  await sleep(50);
+  expect(n).toBe(1);
+});

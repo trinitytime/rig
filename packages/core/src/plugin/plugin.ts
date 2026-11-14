@@ -9,6 +9,8 @@ export interface PluginTimer {
   setTimeout(fn: () => void | Promise<void>, delay: number): () => void;
   /** 이전 실행이 끝나지 않았으면 그 주기는 건너뛴다. */
   setInterval(fn: () => void | Promise<void>, interval: number): () => void;
+  /** 반환된 함수를 부를 때마다 delay를 다시 센다. 마지막 호출 뒤 delay 동안 조용하면 fn을 한 번 실행한다(연속 호출 묶기). */
+  debounce(fn: () => void | Promise<void>, delay: number): () => void;
 }
 
 export interface PluginSignal {
