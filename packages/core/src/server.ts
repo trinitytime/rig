@@ -16,10 +16,10 @@ const FAVICON = path.join(REPO_ROOT, 'assets/rig-icons/web/favicon.ico')
 
 const portSchema = z.coerce.number().int().min(1).max(65535)
 
-/** RIG_PORT(없으면 기본 포트)를 검증한다. 잘못된 값이면 이유와 함께 던진다 (NaN이면 모든 요청이 403이 되어 원인을 찾기 어렵다). */
-export function resolvePort(env: string | undefined = process.env.RIG_PORT): number {
-  const r = portSchema.safeParse(env ?? DEFAULT_PORT)
-  if (!r.success) throw new Error(`RIG_PORT must be an integer from 1 to 65535 (got "${env}")`)
+/** 포트를 RIG_PORT > 설정 파일 > 기본 포트 순으로 고르고 검증한다. 잘못된 값이면 이유와 함께 던진다 (NaN이면 모든 요청이 403이 되어 원인을 찾기 어렵다). */
+export function resolvePort(env: string | undefined = process.env.RIG_PORT, config?: number): number {
+  const r = portSchema.safeParse(env ?? config ?? DEFAULT_PORT)
+  if (!r.success) throw new Error(`${env === undefined ? 'config port' : 'RIG_PORT'} must be an integer from 1 to 65535 (got "${env ?? config}")`)
   return r.data
 }
 

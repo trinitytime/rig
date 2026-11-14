@@ -9,7 +9,7 @@ export interface DiscoveredPlugin {
   dir: string;
   /** 백엔드 엔트리의 절대경로 (없으면 undefined) */
   entry?: string;
-  source: "builtin" | "user";
+  source: "builtin" | "user" | "custom";
 }
 
 export interface DiscoveryError {
@@ -43,9 +43,10 @@ function subDirs(dir: string): string[] {
  * 플러그인 탐색 (우선순위 순, 같은 name이면 먼저 발견된 것이 우선):
  *  1. <repo>/packages/* — 내장
  *  2. <RIG_HOME>/plugins/node_modules/* — npm으로 설치한 플러그인
+ *  3. customDirs — 사용자가 지정한 임의 위치의 플러그인 폴더
  * 백엔드 엔트리는 manifest의 entry(플러그인 폴더 기준 상대경로)가 가리키는 파일 하나다.
  */
-export function discoverPlugins(): { plugins: DiscoveredPlugin[]; errors: DiscoveryError[] } {
+export function discoverPlugins(customDirs: string[] = []): { plugins: DiscoveredPlugin[]; errors: DiscoveryError[] } {
   const plugins: DiscoveredPlugin[] = [];
   const errors: DiscoveryError[] = [];
   const seen = new Set<string>();
@@ -71,6 +72,8 @@ export function discoverPlugins(): { plugins: DiscoveredPlugin[]; errors: Discov
     add(dir, "builtin");
 
   for (const dir of subDirs(path.join(rigHome(), "plugins", "node_modules"))) add(dir, "user");
+
+  for (const dir of customDirs) add(dir, "custom"); // 사용자가 직접 알려 준 위치
 
   return { plugins, errors };
 }

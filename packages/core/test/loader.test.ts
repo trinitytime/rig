@@ -12,7 +12,9 @@ afterAll(() => fs.rmSync(home, { recursive: true, force: true }));
 
 const events: string[] = (globalThis as any).__rigEvents = [];
 
+const ids: string[] = [];
 function plugin(id: string, opts: { requires?: string[]; body?: string; entry?: string | false } = {}) {
+  ids.push(id);
   const dir = path.join(home, "plugins", "node_modules", id);
   fs.mkdirSync(dir, { recursive: true });
   const manifest: Record<string, unknown> = { id, name: id, version: "2026-11-12", requires: opts.requires ?? [] };
@@ -40,7 +42,7 @@ fs.rmSync(path.join(escaping, "index.ts"));
 fs.symlinkSync(outside, path.join(escaping, "index.ts")); // 폴더 밖 파일을 가리키는 심볼릭 링크
 
 const loader = new PluginLoader();
-const statuses = await loader.loadAll();
+const statuses = await loader.loadAll(ids.map((id) => ({ id, source: "user" as const, enabled: true })));
 const by = (id: string) => statuses.find((s) => s.id === id)!;
 
 test("의존하는 플러그인보다 먼저 올라오고, 내려갈 때는 역순이다", async () => {

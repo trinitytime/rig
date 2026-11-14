@@ -3,6 +3,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { discoverPlugins, type DiscoveredPlugin } from './discovery.ts'
 import { rigHome } from '../paths.ts'
+import type { InstalledPlugins } from './registry.ts'
 import type { PluginCleanup, PluginContext, PluginLogger, RigPlugin } from './plugin.ts'
 import { createHttp, HttpRouter } from '../ctx/http.ts'
 import { createSignal, SignalBus } from '../ctx/signal.ts'
@@ -40,9 +41,12 @@ export class PluginLoader {
     return this.statuses
   }
 
-  /** 탐색 → requires 기준 위상 정렬 → 순서대로 import & activate. 한 플러그인의 실패가 다른 플러그인을 막지 않는다. */
-  async loadAll(): Promise<PluginStatus[]> {
-    const { plugins, errors } = discoverPlugins()
+  /** 설치 목록에서 활성화된 것만 탐색 → requires 기준 위상 정렬 → 순서대로 import & activate. 한 플러그인의 실패가 다른 플러그인을 막지 않는다. */
+  async loadAll(installed: InstalledPlugins): Promise<PluginStatus[]> {
+    const on = new Set(installed.filter((i) => i.enabled).map((i) => i.id))
+    const found = discoverPlugins(installed.flatMap((i) => (i.source === 'custom' ? [i.path] : [])))
+    const { errors } = found
+    const plugins = found.plugins.filter((p) => on.has(p.manifest.id))
     this.statuses = errors.map((e) => ({
       id: path.basename(e.dir),
       name: path.basename(e.dir),
