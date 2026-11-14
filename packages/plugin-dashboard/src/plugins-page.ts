@@ -1,4 +1,4 @@
-// 플러그인 목록 화면 (shared "dashboard.page/plugins"에 쓴다). 지금은 더미 데이터다.
+// 플러그인 목록 화면 (shared "dashboard:page/plugins"에 쓴다). 지금은 더미 데이터다.
 // shortcut: 데이터가 고정된 더미다, 실제 목록은 코어의 /api/plugins 같은 출처에서 읽어 만든다.
 const plugins = [
   { id: 'systray', name: 'Systray', description: '시스템 트레이 메뉴', active: true },

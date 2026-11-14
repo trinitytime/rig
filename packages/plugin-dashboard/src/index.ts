@@ -21,7 +21,7 @@ const plugin: RigPlugin = (ctx) => {
   const js = read('client.js')
   const clients = new Set<ReadableStreamDefaultController<string>>()
 
-  // 플러그인이 shared "dashboard.page/<key>"에 화면 JSON을, "dashboard.menu"에 메뉴를 쓰면 신호가 오고, 열려 있는 브라우저에 알린다.
+  // 플러그인이 shared "dashboard:page/<key>"에 화면 JSON을, "dashboard:menu"에 메뉴를 쓰면 신호가 오고, 열려 있는 브라우저에 알린다.
   const send = (chunk: string) => {
     for (const c of [...clients]) {
       try {
@@ -42,7 +42,7 @@ const plugin: RigPlugin = (ctx) => {
     new Response(body, { headers: { 'content-type': `${type}; charset=utf-8`, 'cache-control': 'no-cache' } })
 
   app.get('/', async (c) => {
-    const space = await ctx.shared.get<Record<string, unknown>>('dashboard.page')
+    const space = await ctx.shared.get<Record<string, unknown>>('dashboard:page')
     const { host, port } = await ctx.shared.get<{ host?: string; port?: number }>('http')
     const base = host && port ? `http://${host}:${port}${PATH}` : PATH
     return c.html('<!doctype html>' + (await Shell({ base, space, current: c.req.query('p') }).toString()))
@@ -86,10 +86,10 @@ const plugin: RigPlugin = (ctx) => {
   ctx.shared
     .set('http', '/', '/dashboard') // 코어가 / 요청을 이 주소로 보낸다
     .catch((e) => ctx.log.error('cannot set home page:', e))
-  ctx.shared.set('dashboard.page', 'plugins', pluginsPage).catch((e) => ctx.log.error('cannot set plugins page:', e))
+  ctx.shared.set('dashboard:page', 'plugins', pluginsPage).catch((e) => ctx.log.error('cannot set plugins page:', e))
 
   ctx.shared
-    .set('dashboard.menu', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
+    .set('dashboard:menu', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
     .catch((e) => ctx.log.error('cannot add tray item:', e))
 
   // 기본 브라우저로 대시보드를 연다. 주소는 코어가 shared "http"에 알린 host/port로 만든다.

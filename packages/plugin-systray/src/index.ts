@@ -11,7 +11,7 @@ import type { MenuItem } from 'systray2'
 const m: any = mod
 const SysTray: typeof SysTrayType.default = m.default?.default ?? m.default ?? m
 
-// 마지막 신호 뒤 이 시간 동안 조용하면 shared "dashboard.menu"를 읽어 트레이를 구성한다. 신호가 오면 다시 이 시간만큼 미룬다.
+// 마지막 신호 뒤 이 시간 동안 조용하면 shared "dashboard:menu"를 읽어 트레이를 구성한다. 신호가 오면 다시 이 시간만큼 미룬다.
 const SETTLE_MS = 1000
 
 // 이웃한 항목의 order 차이가 이 값 이상이면 그 사이에 구분선을 넣는다.
@@ -41,7 +41,7 @@ const allowExec = () => {
 }
 
 const build = async (ctx: PluginContext, signals: Map<MenuItem, string>) => {
-  const space = await ctx.shared.get('dashboard.menu')
+  const space = await ctx.shared.get('dashboard:menu')
   const items = Object.values(space)
     .flatMap((v) => {
       const r = trayItem.safeParse(v)
@@ -95,7 +95,7 @@ const plugin: RigPlugin = async (ctx) => {
     queue = queue.then(refresh).catch((e) => ctx.log.error('cannot refresh tray:', e))
   }, SETTLE_MS)
   schedule() // 초기화 후 SETTLE_MS 동안 신호가 없으면 처음 구성한다
-  ctx.signal.on('shared:dashboard.menu', schedule)
+  ctx.signal.on('shared:dashboard:menu', schedule)
 
   return async () => {
     await queue
