@@ -15,5 +15,11 @@
   },
   "devDependencies": {
     "@rig/core": "*"
+  },
+  "rig": {
+    "id": "dashboard",
+    "displayName": "Dashboard",
+    "entry": "src/index.ts",
+    "requires": []
   }
 }

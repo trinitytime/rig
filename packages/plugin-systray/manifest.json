@@ -1,7 +1,0 @@
-{
-  "id": "systray",
-  "name": "systray",
-  "version": "2026-11-12",
-  "entry": "src/index.ts",
-  "requires": []
-}

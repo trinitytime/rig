@@ -15,5 +15,11 @@
   },
   "devDependencies": {
     "@rig/core": "*"
+  },
+  "rig": {
+    "id": "systray",
+    "displayName": "systray",
+    "entry": "src/index.ts",
+    "requires": []
   }
 }

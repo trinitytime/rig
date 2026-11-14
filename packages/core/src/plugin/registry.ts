@@ -20,7 +20,7 @@ const installedPluginSchema = z.discriminatedUnion('source', [
   z.object({
     ...base,
     source: z.literal('custom'),
-    /** manifest.json이 있는 폴더의 절대경로 */ path: z.string().min(1),
+    /** package.json이 있는 폴더의 절대경로 */ path: z.string().min(1),
   }),
 ])
 

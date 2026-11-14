@@ -17,9 +17,9 @@ function plugin(id: string, opts: { requires?: string[]; body?: string; entry?: 
   ids.push(id);
   const dir = path.join(home, "plugins", "node_modules", id);
   fs.mkdirSync(dir, { recursive: true });
-  const manifest: Record<string, unknown> = { id, name: id, version: "2026-11-12", requires: opts.requires ?? [] };
-  if (opts.entry !== false) manifest.entry = opts.entry ?? "index.ts";
-  fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
+  const rig: Record<string, unknown> = { id, displayName: id, requires: opts.requires ?? [] };
+  if (opts.entry !== false) rig.entry = opts.entry ?? "index.ts";
+  fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ name: id, version: "1.0.0", rig }));
   fs.writeFileSync(
     path.join(dir, "index.ts"),
     `export default () => { ${opts.body ?? ""}; globalThis.__rigEvents.push("up:${id}"); return () => globalThis.__rigEvents.push("down:${id}"); };`,

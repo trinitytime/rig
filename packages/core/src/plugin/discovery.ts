@@ -5,7 +5,7 @@ import { REPO_ROOT, rigHome } from "../paths.ts";
 
 export interface DiscoveredPlugin {
   manifest: PluginManifest;
-  /** manifest.json이 있는 폴더 */
+  /** package.json이 있는 폴더 */
   dir: string;
   /** 백엔드 엔트리의 절대경로 (없으면 undefined) */
   entry?: string;
@@ -15,10 +15,6 @@ export interface DiscoveredPlugin {
 export interface DiscoveryError {
   dir: string;
   error: string;
-}
-
-function readManifest(dir: string): PluginManifest {
-  return parseManifest(JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8")));
 }
 
 /** 심볼릭 링크를 풀어도 file이 root 안에 있는지. */
@@ -44,7 +40,7 @@ function subDirs(dir: string): string[] {
  *  1. <repo>/packages/* — 내장
  *  2. <RIG_HOME>/plugins/node_modules/* — npm으로 설치한 플러그인
  *  3. customDirs — 사용자가 지정한 임의 위치의 플러그인 폴더
- * 백엔드 엔트리는 manifest의 entry(플러그인 폴더 기준 상대경로)가 가리키는 파일 하나다.
+ * 백엔드 엔트리는 package.json의 rig.entry(플러그인 폴더 기준 상대경로)가 가리키는 파일 하나다.
  */
 export function discoverPlugins(customDirs: string[] = []): { plugins: DiscoveredPlugin[]; errors: DiscoveryError[] } {
   const plugins: DiscoveredPlugin[] = [];
@@ -52,9 +48,12 @@ export function discoverPlugins(customDirs: string[] = []): { plugins: Discovere
   const seen = new Set<string>();
 
   const add = (dir: string, source: DiscoveredPlugin["source"]) => {
-    if (!fs.existsSync(path.join(dir, "manifest.json"))) return;
+    const file = path.join(dir, "package.json");
+    if (!fs.existsSync(file)) return;
     try {
-      const manifest = readManifest(dir);
+      const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (!pkg.rig) return; // rig 항목이 없으면 플러그인이 아니다 (core, 호이스팅된 의존성 등)
+      const manifest = parseManifest(pkg);
       if (seen.has(manifest.id)) {
         errors.push({ dir, error: `duplicate plugin id "${manifest.id}" (ignored)` });
         return;

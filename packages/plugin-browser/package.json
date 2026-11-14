@@ -11,5 +11,11 @@
   },
   "devDependencies": {
     "@rig/core": "*"
+  },
+  "rig": {
+    "id": "browser",
+    "displayName": "browser",
+    "entry": "src/index.ts",
+    "requires": []
   }
 }
