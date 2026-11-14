@@ -28,4 +28,4 @@ npm workspaces 기반이며, 새 패키지는 `packages/` 아래에 추가하면
 
 ## 플러그인 매니페스트
 
-각 플러그인 폴더의 `manifest.json`이 플러그인 매니페스트입니다. `entry`는 백엔드 파일(`.ts` 또는 `.js`) 하나를 정확히 가리키는, `manifest.json`이 있는 폴더 기준 상대경로입니다. 플러그인 폴더 밖을 가리키는 경로(절대경로, `..`, 폴더 밖으로 향하는 심볼릭 링크)는 거부되며, UI 전용 플러그인은 `entry`를 생략합니다.
+각 플러그인 폴더의 `package.json`이 플러그인 매니페스트입니다. `version`(semver), `description`, `author`, `repository`는 npm 필드를 그대로 쓰고, rig 전용 정보(`id`, `displayName`, `entry`, `ui`, `requires`)는 `rig` 항목에 둡니다. `rig` 항목이 없는 폴더는 플러그인이 아닌 것으로 보고 건너뜁니다. `rig.entry`는 백엔드 파일(`.ts` 또는 `.js`) 하나를 정확히 가리키는, `package.json`이 있는 폴더 기준 상대경로입니다. 플러그인 폴더 밖을 가리키는 경로(절대경로, `..`, 폴더 밖으로 향하는 심볼릭 링크)는 거부되며, UI 전용 플러그인은 `entry`를 생략합니다.
