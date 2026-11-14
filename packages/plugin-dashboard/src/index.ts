@@ -10,7 +10,6 @@ import { pluginsPage } from './plugins-page.ts'
 // 타입만 import한다: 플러그인은 런타임에 @rig/core를 import하지 않는다.
 // 코어가 접두사를 떼므로 서버는 자기 주소를 모른다. 링크는 코어가 shared "http"에 알린 host/port로 만든다.
 const PATH = '/dashboard/'
-const DASHBOARD_URL = 'http://localhost:7440/dashboard'
 const read = (f: string) => readFileSync(join(import.meta.dirname, f), 'utf8')
 const name = z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/)
 const eventBody = z.object({ page: name, id: name, value: z.unknown().optional() })
@@ -93,14 +92,17 @@ const plugin: RigPlugin = (ctx) => {
     .set('dashboard.menu', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
     .catch((e) => ctx.log.error('cannot add tray item:', e))
 
-  // 기본 브라우저로 대시보드를 연다. 플러그인은 코어의 포트 상수를 import하지 않으므로 주소를 고정해 둔다.
-  ctx.signal.on('dashboard:open', () => {
+  // 기본 브라우저로 대시보드를 연다. 주소는 코어가 shared "http"에 알린 host/port로 만든다.
+  ctx.signal.on('dashboard:open', async () => {
+    const { host, port } = await ctx.shared.get<{ host?: string; port?: number }>('http')
+    if (!host || !port) return ctx.log.error('cannot open browser: shared "http" has no host/port')
+    const url = `http://${host}:${port}${PATH}`
     const [cmd, ...args] =
       process.platform === 'win32'
-        ? ['cmd', '/c', 'start', '', DASHBOARD_URL]
+        ? ['cmd', '/c', 'start', '', url]
         : process.platform === 'darwin'
-          ? ['open', DASHBOARD_URL]
-          : ['xdg-open', DASHBOARD_URL]
+          ? ['open', url]
+          : ['xdg-open', url]
     spawn(cmd!, args, { stdio: 'ignore', detached: true })
       .on('error', (e) => ctx.log.error('cannot open browser:', e))
       .unref()
