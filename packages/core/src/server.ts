@@ -10,7 +10,7 @@ import { REPO_ROOT } from './paths.ts'
 /** 기본 포트. 전화 키패드로 R-I-G = 7-4-4 (+0). 흔한 개발 포트(3000/5173/8080)와 겹치지 않음. */
 export const DEFAULT_PORT = 7440
 /** 보안상 로컬 루프백에만 바인딩한다. */
-export const DEFAULT_HOST = 'localhost'
+export const DEFAULT_HOST = '127.0.0.1'
 
 const FAVICON = path.join(REPO_ROOT, 'assets/rig-icons/web/favicon.ico')
 
@@ -19,7 +19,10 @@ const portSchema = z.coerce.number().int().min(1).max(65535)
 /** 포트를 RIG_PORT > 설정 파일 > 기본 포트 순으로 고르고 검증한다. 잘못된 값이면 이유와 함께 던진다 (NaN이면 모든 요청이 403이 되어 원인을 찾기 어렵다). */
 export function resolvePort(env: string | undefined = process.env.RIG_PORT, config?: number): number {
   const r = portSchema.safeParse(env ?? config ?? DEFAULT_PORT)
-  if (!r.success) throw new Error(`${env === undefined ? 'config port' : 'RIG_PORT'} must be an integer from 1 to 65535 (got "${env ?? config}")`)
+  if (!r.success)
+    throw new Error(
+      `${env === undefined ? 'config port' : 'RIG_PORT'} must be an integer from 1 to 65535 (got "${env ?? config}")`,
+    )
   return r.data
 }
 

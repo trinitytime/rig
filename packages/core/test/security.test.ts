@@ -98,10 +98,12 @@ test('잘못된 allowedHosts는 무시하고 경고하며, 없거나 올바르�
 
 test('startServer는 요청을 받을 수 있게 된 뒤에 resolve하고, 포트가 사용 중이면 reject한다', async () => {
   const port = 17440 + Math.floor(Math.random() * 1000)
-  const server = await startServer({ port })
+  // Bun은 hostname이 "localhost"면 같은 포트를 두 번 열어도 던지지 않으므로, 주소를 직접 지정해 시험한다.
+  const host = '127.0.0.1'
+  const server = await startServer({ port, host })
   try {
-    expect((await fetch(`http://localhost:${port}/health`)).status).toBe(200) // resolve 직후 바로 응답
-    await expect(startServer({ port })).rejects.toThrow()
+    expect((await fetch(`http://${host}:${port}/health`)).status).toBe(200) // resolve 직후 바로 응답
+    await expect(startServer({ port, host })).rejects.toThrow()
   } finally {
     server.close()
   }
