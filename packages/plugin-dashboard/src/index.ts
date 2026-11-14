@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Hono } from 'hono'
+import { z } from 'zod'
 import type { RigPlugin } from '@rig/core'
 import { Shell } from './render.tsx'
 import { pluginsPage } from './plugins-page.ts'
@@ -11,15 +12,17 @@ import { pluginsPage } from './plugins-page.ts'
 const PATH = '/dashboard/'
 const DASHBOARD_URL = 'http://localhost:7440/dashboard'
 const read = (f: string) => readFileSync(join(import.meta.dirname, f), 'utf8')
-const name = /^[A-Za-z0-9_.-]{1,64}$/
+const name = z.string().regex(/^[A-Za-z0-9_.-]{1,64}$/)
+const eventBody = z.object({ page: name, id: name, value: z.unknown().optional() })
+// 화면(page)이나 메뉴(menu)가 바뀐 뒤 이 시간 동안 조용하면 브라우저에 알린다.
+const SETTLE_MS = 1000
 
 const plugin: RigPlugin = (ctx) => {
   const css = read('rig-ui.css')
   const js = read('client.js')
   const clients = new Set<ReadableStreamDefaultController<string>>()
 
-  // 플러그인이 shared "ui/<key>"에 화면 JSON을 쓰면 이 신호가 오고, 열려 있는 브라우저에 알린다.
-  let pending = false
+  // 플러그인이 shared "dashboard.page/<key>"에 화면 JSON을, "dashboard.menu"에 메뉴를 쓰면 신호가 오고, 열려 있는 브라우저에 알린다.
   const send = (chunk: string) => {
     for (const c of [...clients]) {
       try {
@@ -29,14 +32,9 @@ const plugin: RigPlugin = (ctx) => {
       }
     }
   }
-  ctx.signal.on('shared:ui', () => {
-    if (pending) return // 짧은 시간의 연속 변경은 한 번으로 묶는다
-    pending = true
-    ctx.timer.setTimeout(() => {
-      pending = false
-      send('data: changed\n\n')
-    }, 50)
-  })
+  const changed = ctx.timer.debounce(() => send('data: changed\n\n'), SETTLE_MS) // 연속 변경은 한 번으로 묶는다
+  ctx.signal.on('shared:dashboard:page', changed)
+  ctx.signal.on('shared:dashboard:menu', changed)
   // Bun은 10초 동안 아무것도 안 보내면 연결을 끊으므로 주기적으로 주석 줄을 보낸다.
   ctx.timer.setInterval(() => send(': ping\n\n'), 5000)
 
@@ -45,7 +43,7 @@ const plugin: RigPlugin = (ctx) => {
     new Response(body, { headers: { 'content-type': `${type}; charset=utf-8`, 'cache-control': 'no-cache' } })
 
   app.get('/', async (c) => {
-    const space = await ctx.shared.get<Record<string, unknown>>('ui')
+    const space = await ctx.shared.get<Record<string, unknown>>('dashboard.page')
     const { host, port } = await ctx.shared.get<{ host?: string; port?: number }>('http')
     const base = host && port ? `http://${host}:${port}${PATH}` : PATH
     return c.html('<!doctype html>' + (await Shell({ base, space, current: c.req.query('p') }).toString()))
@@ -70,13 +68,13 @@ const plugin: RigPlugin = (ctx) => {
     })
   })
 
-  // 컨트롤 조작을 `ui:<화면 key>:<컨트롤 id>` 신호({ value })로 바꿔 플러그인에 전달한다.
+  // 컨트롤 조작을 `dashboard:<화면 key>:<컨트롤 id>` 신호({ value })로 바꿔 플러그인에 전달한다.
   app.post('/event', async (c) => {
-    const b = (await c.req.json().catch(() => null)) as { page?: unknown; id?: unknown; value?: unknown } | null
-    if (typeof b?.page !== 'string' || typeof b.id !== 'string' || !name.test(b.page) || !name.test(b.id))
-      return c.json({ error: 'bad request' }, 400)
+    const r = eventBody.safeParse(await c.req.json().catch(() => null))
+    if (!r.success) return c.json({ error: 'bad request' }, 400)
+    const b = r.data
     try {
-      ctx.signal.emit(`ui:${b.page}:${b.id}`, { value: b.value ?? null })
+      ctx.signal.emit(`dashboard:${b.page}:${b.id}`, { value: b.value ?? null })
     } catch (e) {
       ctx.log.error('cannot emit ui event:', e)
       return c.json({ error: 'bad request' }, 400)
@@ -89,10 +87,10 @@ const plugin: RigPlugin = (ctx) => {
   ctx.shared
     .set('http', '/', '/dashboard') // 코어가 / 요청을 이 주소로 보낸다
     .catch((e) => ctx.log.error('cannot set home page:', e))
-  ctx.shared.set('ui', 'plugins', pluginsPage).catch((e) => ctx.log.error('cannot set plugins page:', e))
+  ctx.shared.set('dashboard.page', 'plugins', pluginsPage).catch((e) => ctx.log.error('cannot set plugins page:', e))
 
   ctx.shared
-    .set('tray', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
+    .set('dashboard.menu', 'dashboard', { id: 'dashboard', name: 'Dashboard', signal: 'dashboard:open', order: 100 })
     .catch((e) => ctx.log.error('cannot add tray item:', e))
 
   // 기본 브라우저로 대시보드를 연다. 플러그인은 코어의 포트 상수를 import하지 않으므로 주소를 고정해 둔다.

@@ -3,7 +3,7 @@ import { obj, str, type Obj } from '../util.ts'
 
 export type PageEntry = { key: string; title: string }
 
-/** shared "ui" 공간에서 화면 목록을 뽑는다. items 배열이 있는 값만 화면으로 본다. */
+/** shared "dashboard.page" 공간에서 화면 목록을 뽑는다. items 배열이 있는 값만 화면으로 본다. */
 export function pageList(space: Obj): PageEntry[] {
   return Object.entries(space)
     .filter(([, v]) => Array.isArray(obj(v).items))

@@ -11,7 +11,7 @@ import { Divider, Heading, Text } from './Text.tsx'
 import { TextareaRow } from './TextareaRow.tsx'
 import { ToggleRow } from './ToggleRow.tsx'
 
-// 선언형 화면 JSON(shared "ui" 공간의 값)을 HTML로 그린다. 값은 모두 외부 입력이라 문자열로 바꿔 쓰고, hono가 이스케이프한다.
+// 선언형 화면 JSON(shared "dashboard.page" 공간의 값)을 HTML로 그린다. 값은 모두 외부 입력이라 문자열로 바꿔 쓰고, hono가 이스케이프한다.
 // shortcut: 스키마를 zod로 검증하지 않고 모르는 type은 건너뛴다, 플러그인이 늘어 오류 안내가 필요해지면 검증을 추가.
 
 /** 항목 JSON의 type에 맞는 컴포넌트를 고른다. */

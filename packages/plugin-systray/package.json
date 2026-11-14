@@ -7,7 +7,8 @@
     "node": ">=22.18"
   },
   "dependencies": {
-    "systray2": "^2.1.4"
+    "systray2": "^2.1.4",
+    "zod": "^4.6.7"
   },
   "peerDependencies": {
     "@rig/core": "*"

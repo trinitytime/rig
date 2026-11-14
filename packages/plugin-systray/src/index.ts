@@ -2,6 +2,7 @@ import { chmodSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import type { PluginContext, RigPlugin } from '@rig/core'
+import { z } from 'zod'
 import * as mod from 'systray2'
 import type SysTrayType from 'systray2'
 import type { MenuItem } from 'systray2'
@@ -10,24 +11,14 @@ import type { MenuItem } from 'systray2'
 const m: any = mod
 const SysTray: typeof SysTrayType.default = m.default?.default ?? m.default ?? m
 
-// 마지막 신호 뒤 이 시간 동안 조용하면 shared "tray"를 읽어 트레이를 구성한다. 신호가 오면 다시 이 시간만큼 미룬다.
+// 마지막 신호 뒤 이 시간 동안 조용하면 shared "dashboard.menu"를 읽어 트레이를 구성한다. 신호가 오면 다시 이 시간만큼 미룬다.
 const SETTLE_MS = 1000
 
 // 이웃한 항목의 order 차이가 이 값 이상이면 그 사이에 구분선을 넣는다.
 const SEPARATOR_GAP = 100
 
-type TrayItem = { id: string; name: string; signal: string; order: number }
-
-const isTrayItem = (v: unknown): v is TrayItem => {
-  const t = v as TrayItem
-  return (
-    !!t &&
-    typeof t.id === 'string' &&
-    typeof t.name === 'string' &&
-    typeof t.signal === 'string' &&
-    typeof t.order === 'number'
-  )
-}
+const trayItem = z.object({ id: z.string(), name: z.string(), signal: z.string(), order: z.number() })
+type TrayItem = z.infer<typeof trayItem>
 
 // shortcut: Windows는 어두운 작업 표시줄용(dark) 아이콘만 쓴다, 테마 감지가 필요하면 light.ico와 전환.
 const trayIcons = {
@@ -50,11 +41,12 @@ const allowExec = () => {
 }
 
 const build = async (ctx: PluginContext, signals: Map<MenuItem, string>) => {
-  const space = await ctx.shared.get('tray')
+  const space = await ctx.shared.get('dashboard.menu')
   const items = Object.values(space)
-    .filter((v): v is TrayItem => {
-      if (!isTrayItem(v)) ctx.log.warn('ignored invalid tray value:', v)
-      return isTrayItem(v)
+    .flatMap((v) => {
+      const r = trayItem.safeParse(v)
+      if (!r.success) ctx.log.warn('ignored invalid tray value:', v)
+      return r.success ? [r.data] : []
     })
     .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
     .flatMap((t, i, all) => {
@@ -86,7 +78,6 @@ const plugin: RigPlugin = async (ctx) => {
   allowExec()
   let tray: InstanceType<typeof SysTray> | undefined
   let queue: Promise<unknown> = Promise.resolve()
-  let cancel: (() => void) | undefined
 
   // 항목이 하나도 없으면 아무것도 하지 않는다(기존 트레이도 그대로 둔다).
   // Linux 트레이 바이너리는 update-menu로 항목 수를 바꾸지 못하므로, 갱신은 트레이를 닫고 다시 띄운다.
@@ -100,17 +91,13 @@ const plugin: RigPlugin = async (ctx) => {
     tray = await start(ctx, menu, signals)
   }
 
-  const schedule = () => {
-    cancel?.()
-    cancel = ctx.timer.setTimeout(() => {
-      queue = queue.then(refresh).catch((e) => ctx.log.error('cannot refresh tray:', e))
-    }, SETTLE_MS)
-  }
+  const schedule = ctx.timer.debounce(() => {
+    queue = queue.then(refresh).catch((e) => ctx.log.error('cannot refresh tray:', e))
+  }, SETTLE_MS)
   schedule() // 초기화 후 SETTLE_MS 동안 신호가 없으면 처음 구성한다
-  ctx.signal.on('shared:tray', schedule)
+  ctx.signal.on('shared:dashboard.menu', schedule)
 
   return async () => {
-    cancel?.()
     await queue
     await tray?.kill(false)
   }
