@@ -3,6 +3,5 @@
   "name": "browser",
   "version": "2026-11-12",
   "entry": "src/index.ts",
-  "requires": [],
-  "permissions": []
+  "requires": []
 }
