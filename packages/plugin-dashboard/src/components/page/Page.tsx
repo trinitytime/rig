@@ -1,18 +1,55 @@
 /** @jsxImportSource hono/jsx */
-import { arr, obj, str, type Obj } from '../util.ts'
+import type { FC } from 'hono/jsx'
+import { arr, controlProps, obj, str, type Obj } from '../util.ts'
 import { Badge } from './Badge.tsx'
-import { ButtonRow } from './ButtonRow.tsx'
-import { InputRow } from './InputRow.tsx'
-import { ListRow } from './ListRow.tsx'
+import { Button } from './Button.tsx'
+import { Input } from './Input.tsx'
+import { List } from './List.tsx'
 import { Panel } from './Panel.tsx'
-import { SelectRow } from './SelectRow.tsx'
-import { TableRow } from './TableRow.tsx'
+import { Row } from './Row.tsx'
+import { Select } from './Select.tsx'
+import { Table } from './Table.tsx'
 import { Divider, Heading, Text } from './Text.tsx'
-import { TextareaRow } from './TextareaRow.tsx'
-import { ToggleRow } from './ToggleRow.tsx'
+import { Textarea } from './Textarea.tsx'
+import { Toggle } from './Toggle.tsx'
 
 // 선언형 화면 JSON(shared "dashboard:page" 공간의 값)을 HTML로 그린다. 값은 모두 외부 입력이라 문자열로 바꿔 쓰고, hono가 이스케이프한다.
 // shortcut: 스키마를 zod로 검증하지 않고 모르는 type은 건너뛴다, 플러그인이 늘어 오류 안내가 필요해지면 검증을 추가.
+
+const CONTROLS: Record<string, FC<{ it: Obj; k: string }>> = {
+  toggle: Toggle,
+  input: Input,
+  textarea: Textarea,
+  select: Select,
+  button: Button,
+  list: List,
+  table: Table,
+}
+/** 라벨이 가리킬 수 있는 입력 컨트롤. */
+const LABELLED = new Set(['toggle', 'input', 'textarea', 'select'])
+/** 라벨 아래에 한 줄을 다 쓰는 컨트롤. */
+const BLOCK = new Set(['textarea', 'list', 'table'])
+
+/** 라벨, 부연, 설명은 it에서 읽고, 오른쪽(블록이면 아래)에 컨트롤들을 놓는다. 컨트롤이 아닌 type은 건너뛴다. */
+const RowItem = ({ it, k, kids }: { it: Obj; k: string; kids: [Obj, string][] }) => {
+  const known = kids.flatMap(([c, ck]) => {
+    const Control = CONTROLS[str(c.type)]
+    return Control ? [{ Control, c, ck }] : []
+  })
+  const first = known.find(({ c }) => LABELLED.has(str(c.type)))
+  return (
+    <Row
+      k={k}
+      it={it}
+      block={known.some(({ c }) => BLOCK.has(str(c.type)))}
+      labelFor={first && controlProps(first.c, first.ck).id}
+    >
+      {known.map(({ Control, c, ck }) => (
+        <Control it={c} k={ck} />
+      ))}
+    </Row>
+  )
+}
 
 /** 항목 JSON의 type에 맞는 컴포넌트를 고른다. */
 const Item = ({ it: raw, k }: { it: unknown; k: string }) => {
@@ -38,22 +75,8 @@ const Item = ({ it: raw, k }: { it: unknown; k: string }) => {
           ))}
         </Panel>
       )
-    case 'toggle':
-      return <ToggleRow it={it} k={k} />
-    case 'input':
-      return <InputRow it={it} k={k} />
-    case 'textarea':
-      return <TextareaRow it={it} k={k} />
-    case 'select':
-      return <SelectRow it={it} k={k} />
-    case 'button':
-      return <ButtonRow it={it} k={k} />
-    case 'list':
-      return <ListRow it={it} k={k} />
-    case 'table':
-      return <TableRow it={it} k={k} />
     default:
-      return null
+      return CONTROLS[str(it.type)] ? <RowItem it={it} k={k} kids={[[it, k]]} /> : null
   }
 }
 
