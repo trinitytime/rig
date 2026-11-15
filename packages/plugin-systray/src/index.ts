@@ -18,7 +18,6 @@ const SETTLE_MS = 1000
 const SEPARATOR_GAP = 100
 
 const trayItem = z.object({ id: z.string(), name: z.string(), signal: z.string(), order: z.number() })
-type TrayItem = z.infer<typeof trayItem>
 
 // shortcut: Windows는 어두운 작업 표시줄용(dark) 아이콘만 쓴다, 테마 감지가 필요하면 light.ico와 전환.
 const trayIcons = {
@@ -102,4 +101,7 @@ const plugin: RigPlugin = async (ctx) => {
     await tray?.kill(false)
   }
 }
+
+export type TrayItem = z.infer<typeof trayItem>
+
 export default plugin
