@@ -7,7 +7,7 @@ const plugins = [
   { id: 'storage', name: 'Storage', version: '0.0.0', author: 'buwon', description: '플러그인 데이터 저장소', active: false },
 ]
 
-// 토글을 바꾸면 `dashboard:plugins:toggle-<id>` 신호({ value })가 나간다.
+// 토글을 바꾸면 `dashboard:plugins:toggle-<id>` 신호({ value })가, 삭제를 누르면 `dashboard:plugins:remove-<id>` 신호가 나간다. 켜져 있는 플러그인은 삭제할 수 없다.
 export const pluginsPage = {
   title: 'Plugins',
   description: '설치된 플러그인을 켜고 끕니다.',
@@ -18,12 +18,14 @@ export const pluginsPage = {
       title: '설치된 플러그인',
       description: `플러그인 ${plugins.length}개`,
       items: plugins.map((p) => ({
-        type: 'toggle',
-        id: `toggle-${p.id}`,
+        type: 'row',
         label: p.name,
         meta: `v${p.version} · ${p.author}`,
         description: p.description,
-        value: p.active,
+        items: [
+          { type: 'toggle', id: `toggle-${p.id}`, value: p.active },
+          { type: 'button', id: `remove-${p.id}`, text: '삭제', variant: 'danger', disabled: p.active },
+        ],
       })),
     },
   ],
