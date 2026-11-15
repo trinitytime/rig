@@ -47,6 +47,8 @@ export interface PluginShared {
   get<T = unknown>(workspace: string, key: string): Promise<T | undefined>;
   /** workspace의 모든 key/value를 읽는다. 없으면 {}. */
   get<T = Record<string, unknown>>(workspace: string): Promise<T>;
+  /** key를 처음 쓴 플러그인의 id를 읽는다 (코어가 쓴 값은 "core"). 없으면 undefined. */
+  owner(workspace: string, key: string): Promise<string | undefined>;
   /** key를 지운다 (소유자만). 없으면 아무 일도 없다. */
   delete(workspace: string, key: string): Promise<void>;
 }

@@ -54,6 +54,11 @@ export class SharedMemory {
     return structuredClone(space?.get(key)?.value)
   }
 
+  /** key를 처음 쓴 플러그인의 id. 없으면 undefined. */
+  owner(ws: string, key: string): string | undefined {
+    return this.spaces.get(ws)?.get(key)?.owner
+  }
+
   delete(owner: string, ws: string, key: string): void {
     const cur = this.spaces.get(ws)?.get(key)
     if (cur && cur.owner !== owner) throw new Error(`"${ws}/${key}" is owned by another plugin`)
@@ -79,6 +84,9 @@ export function createShared(mem: SharedMemory, id: string, track: Track): Plugi
     },
     async get(ws: string, key?: string) {
       return mem.get(name.parse(ws), key === undefined ? undefined : keySchema.parse(key)) as never
+    },
+    async owner(ws, key) {
+      return mem.owner(name.parse(ws), keySchema.parse(key))
     },
     async delete(ws, key) {
       mem.delete(id, name.parse(ws), keySchema.parse(key))

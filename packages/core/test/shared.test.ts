@@ -29,6 +29,18 @@ test("key마다 소유자가 있고, 같은 workspace에 다른 플러그인이 
   expect(await b.get("ws", "k1")).toBe(3);
 });
 
+test("owner는 key를 처음 쓴 플러그인의 id를 알려주고, 지우면 사라진다", async () => {
+  const mem = new SharedMemory(noEmit);
+  const o = new Ownership();
+  const a = plugin(mem, o, "a");
+  const b = plugin(mem, o, "b");
+  await a.set("ws", "k1", 1);
+  expect(await b.owner("ws", "k1")).toBe("a");
+  expect(await b.owner("ws", "none")).toBeUndefined();
+  await a.delete("ws", "k1");
+  expect(await b.owner("ws", "k1")).toBeUndefined();
+});
+
 test("delete나 null/undefined 쓰기는 삭제이며 소유권도 사라진다", async () => {
   const mem = new SharedMemory(noEmit);
   const o = new Ownership();
