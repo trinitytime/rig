@@ -62,13 +62,15 @@ const plugin: RigPlugin = (ctx) => {
     })
   })
 
-  // 컨트롤 조작을 `dashboard:<화면 key>:<컨트롤 id>` 신호({ value })로 바꿔 플러그인에 전달한다.
+  // 컨트롤 조작을 `<화면을 등록한 플러그인 id>:<화면 key>:<컨트롤 id>` 신호({ value })로 바꿔 그 플러그인에 전달한다 (플러그인끼리 이름이 겹치지 않게).
   app.post('/api/event', async (c) => {
     const r = eventBody.safeParse(await c.req.json().catch(() => null))
     if (!r.success) return c.json({ error: 'bad request' }, 400)
     const b = r.data
+    const owner = await ctx.shared.owner('dashboard:page', b.page)
+    if (!owner) return c.json({ error: 'not found' }, 404)
     try {
-      ctx.signal.emit(`dashboard:${b.page}:${b.id}`, { value: b.value ?? null })
+      ctx.signal.emit(`${owner}:${b.page}:${b.id}`, { value: b.value ?? null })
     } catch (e) {
       ctx.log.error('cannot emit ui event:', e)
       return c.json({ error: 'bad request' }, 400)

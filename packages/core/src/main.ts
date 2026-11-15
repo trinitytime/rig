@@ -38,7 +38,7 @@ function init(loader: PluginLoader, config: Config, getServer: () => Server | un
   const scan = () =>
     loader.shared.set('core', 'dashboard:page', 'installed-plugins', installedPluginsPage(loadInstalled(config)), () => () => {})
   scan()
-  loader.signals.on('dashboard:installed-plugins:refresh', scan, console)
+  loader.signals.on('core:installed-plugins:refresh', scan, console)
   return { host, port }
 }
 
