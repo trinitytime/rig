@@ -1,11 +1,12 @@
 import { type Config, readConfig } from './config.ts'
+import { installedPluginsPage } from './plugin/installed-page.ts'
 import { PluginLoader } from './plugin/loader.ts'
 import { loadInstalled } from './plugin/registry.ts'
 import { DEFAULT_HOST, resolvePort, startServer } from './server.ts'
 
 type Server = Awaited<ReturnType<typeof startServer>>
 
-// 초기화: 종료 처리, 트레이의 Exit 항목, 서버 주소 공유. 코어는 프로세스와 수명이 같아 shared 해제 함수는 필요 없다.
+// 초기화: 종료 처리, 트레이의 Exit 항목, 서버 주소 공유, 설치된 플러그인 화면. 코어는 프로세스와 수명이 같아 shared 해제 함수는 필요 없다.
 function init(loader: PluginLoader, config: Config, getServer: () => Server | undefined) {
   let closing = false
   const shutdown = async () => {
@@ -31,6 +32,8 @@ function init(loader: PluginLoader, config: Config, getServer: () => Server | un
   const port = resolvePort(undefined, config.port)
   loader.shared.set('core', 'http', 'host', host, () => () => {})
   loader.shared.set('core', 'http', 'port', port, () => () => {})
+  // 설치된 플러그인을 스캔해 대시보드의 'installed-plugins' 화면으로 알린다.
+  loader.shared.set('core', 'dashboard:page', 'installed-plugins', installedPluginsPage(loadInstalled(config)), () => () => {})
   return { host, port }
 }
 
