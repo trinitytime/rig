@@ -45,7 +45,7 @@ const plugin: RigPlugin = (ctx) => {
   app.get('/rig-ui.css', () => text(css, 'text/css'))
   app.get('/client.js', () => text(js, 'text/javascript'))
 
-  app.get('/events', () => {
+  app.get('/api/events', () => {
     let self: ReadableStreamDefaultController<string>
     const stream = new ReadableStream<string>({
       start(controller) {
@@ -63,7 +63,7 @@ const plugin: RigPlugin = (ctx) => {
   })
 
   // 컨트롤 조작을 `dashboard:<화면 key>:<컨트롤 id>` 신호({ value })로 바꿔 플러그인에 전달한다.
-  app.post('/event', async (c) => {
+  app.post('/api/event', async (c) => {
     const r = eventBody.safeParse(await c.req.json().catch(() => null))
     if (!r.success) return c.json({ error: 'bad request' }, 400)
     const b = r.data

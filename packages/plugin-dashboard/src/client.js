@@ -6,7 +6,7 @@
   const leaves = (root) => [...root.querySelectorAll("[data-k]")];
 
   const post = (id, value) =>
-    fetch(`${base}event`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ page, id, value }) });
+    fetch(`${base}api/event`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ page, id, value }) });
 
   document.addEventListener("change", (e) => {
     const el = e.target;
@@ -39,7 +39,7 @@
     sync(document.querySelector("main"), doc.querySelector("main"));
   };
 
-  const es = new EventSource(`${base}events`);
+  const es = new EventSource(`${base}api/events`);
   es.onmessage = reload;
   es.onopen = reload; // 재연결 사이에 놓친 변경을 따라잡는다
 })();
