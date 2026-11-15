@@ -79,10 +79,11 @@ const plugin: RigPlugin = (ctx) => {
   // 화면은 `/dashboard/<화면 key>`, 첫 화면은 `/dashboard/`다. 정적 파일과 api보다 뒤에 등록한다.
   const page = async (current?: string) => {
     const space = await ctx.shared.get<Record<string, unknown>>('dashboard:page')
+    const menu = await ctx.shared.get<Record<string, unknown>>('dashboard:menu')
     if (current !== undefined && !pageList(space).some((p) => p.key === current)) return new Response('not found', { status: 404 })
     const { host, port } = await ctx.shared.get<{ host?: string; port?: number }>('http')
     const base = host && port ? `http://${host}:${port}${PATH}` : PATH
-    return new Response('<!doctype html>' + (await Shell({ base, space, current }).toString()), {
+    return new Response('<!doctype html>' + (await Shell({ base, space, menu, current }).toString()), {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     })
   }

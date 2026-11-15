@@ -1,4 +1,5 @@
 /** @jsxImportSource hono/jsx */
+import { z } from 'zod'
 import { obj, str, type Obj } from '../util.ts'
 
 export type PageEntry = { key: string; title: string }
@@ -11,20 +12,33 @@ export function pageList(space: Obj): PageEntry[] {
     .sort((a, b) => a.title.localeCompare(b.title))
 }
 
-/** 왼쪽 화면 목록. current는 지금 보고 있는 화면의 key. */
-export const Side = ({ base, pages, current }: { base: string; pages: PageEntry[]; current?: string }) => (
+const menuItem = z.object({ name: z.string().min(1), page: z.string().min(1), order: z.number().optional() })
+export type MenuEntry = z.infer<typeof menuItem>
+
+/** shared "dashboard:menu" 공간에서 사이드바 메뉴를 뽑는다 ({ name, page, order? }). 화면(dashboard:page)과는 독립이라 없는 화면을 가리켜도 그대로 둔다. */
+export function menuList(space: Obj): MenuEntry[] {
+  return Object.values(space)
+    .flatMap((v) => {
+      const r = menuItem.safeParse(v)
+      return r.success ? [r.data] : []
+    })
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name))
+}
+
+/** 왼쪽 메뉴. 각 항목은 화면 key(page)로 가고, current는 지금 보고 있는 화면의 key. */
+export const Side = ({ base, menu, current }: { base: string; menu: MenuEntry[]; current?: string }) => (
   <aside class="rig-side">
     <h2 class="rig-side-title">Rig</h2>
-    <nav aria-label="화면 목록">
+    <nav aria-label="메뉴">
       <ul class="rig-nav-list">
-        {pages.map((p) => (
+        {menu.map((m) => (
           <li>
             <a
               class="rig-nav-item"
-              href={`${base}${encodeURIComponent(p.key)}`}
-              aria-current={p.key === current ? 'page' : undefined}
+              href={`${base}${encodeURIComponent(m.page)}`}
+              aria-current={m.page === current ? 'page' : undefined}
             >
-              {p.title}
+              {m.name}
             </a>
           </li>
         ))}
