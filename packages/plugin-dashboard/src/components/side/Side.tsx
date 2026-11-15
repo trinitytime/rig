@@ -21,7 +21,7 @@ export const Side = ({ base, pages, current }: { base: string; pages: PageEntry[
           <li>
             <a
               class="rig-nav-item"
-              href={`${base}?p=${encodeURIComponent(p.key)}`}
+              href={`${base}${encodeURIComponent(p.key)}`}
               aria-current={p.key === current ? 'page' : undefined}
             >
               {p.title}

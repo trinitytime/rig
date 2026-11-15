@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import type { RigPlugin } from '@rig/core'
+import { pageList } from './components/side/Side.tsx'
 import { Shell } from './render.tsx'
 import { pluginsPage } from './plugins-page.ts'
 
@@ -41,12 +42,6 @@ const plugin: RigPlugin = (ctx) => {
   const text = (body: string, type: string) =>
     new Response(body, { headers: { 'content-type': `${type}; charset=utf-8`, 'cache-control': 'no-cache' } })
 
-  app.get('/', async (c) => {
-    const space = await ctx.shared.get<Record<string, unknown>>('dashboard:page')
-    const { host, port } = await ctx.shared.get<{ host?: string; port?: number }>('http')
-    const base = host && port ? `http://${host}:${port}${PATH}` : PATH
-    return c.html('<!doctype html>' + (await Shell({ base, space, current: c.req.query('p') }).toString()))
-  })
   app.get('/rig-ui.css', () => text(css, 'text/css'))
   app.get('/client.js', () => text(js, 'text/javascript'))
 
@@ -80,6 +75,19 @@ const plugin: RigPlugin = (ctx) => {
     }
     return c.body(null, 204)
   })
+
+  // 화면은 `/dashboard/<화면 key>`, 첫 화면은 `/dashboard/`다. 정적 파일과 api보다 뒤에 등록한다.
+  const page = async (current?: string) => {
+    const space = await ctx.shared.get<Record<string, unknown>>('dashboard:page')
+    if (current !== undefined && !pageList(space).some((p) => p.key === current)) return new Response('not found', { status: 404 })
+    const { host, port } = await ctx.shared.get<{ host?: string; port?: number }>('http')
+    const base = host && port ? `http://${host}:${port}${PATH}` : PATH
+    return new Response('<!doctype html>' + (await Shell({ base, space, current }).toString()), {
+      headers: { 'content-type': 'text/html; charset=utf-8' },
+    })
+  }
+  app.get('/', () => page())
+  app.get('/:page', (c) => page(c.req.param('page')))
 
   ctx.http.fetch((req) => app.fetch(req))
 
