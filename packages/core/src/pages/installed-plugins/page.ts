@@ -14,29 +14,23 @@ const pluginRow = ({ manifest: m, source }: DiscoveredPlugin, enabled: boolean) 
   items: [{ type: 'toggle', id: `toggle-${m.id}`, value: enabled, disabled: true }],
 })
 
-/** 플러그인 추가 패널의 상태: 입력한 경로, 진행 중 여부, 마지막 결과(성공 문구 또는 입력 아래에 보일 오류). */
-export type AddState = {
-  busy: boolean
-  path: string
-  archive: string
-  message?: string
-  error?: { target: 'path' | 'archive'; text: string }
-}
+/** 플러그인 추가 패널의 상태: 입력한 경로, 진행 중 여부, 마지막 결과(성공 문구, 또는 입력 아래에 보일 오류). */
+export type AddState = { busy: boolean; path: string; message?: string; error?: string }
 
-const addRow = (add: AddState, target: 'path' | 'archive', label: string, description: string, placeholder: string) => ({
+const addRow = (add: AddState) => ({
   type: 'row',
-  label,
-  description,
+  label: '플러그인 경로',
+  description: '플러그인 폴더나 압축 파일(.tgz 등)의 절대 경로입니다. 폴더는 그 자리에서 설치하고, 압축 파일은 플러그인 설치 경로에 풀어서 설치합니다.',
   items: [
     {
       type: 'input',
-      id: target,
-      value: add[target],
-      placeholder,
+      id: 'path',
+      value: add.path,
+      placeholder: '/path/to/plugin 또는 /path/to/plugin.tgz',
       disabled: add.busy,
-      ...(add.error?.target === target ? { error: add.error.text } : {}),
+      ...(add.error ? { error: add.error } : {}),
     },
-    { type: 'button', id: `add-${target}`, text: add.busy ? '설치 중...' : '추가', disabled: add.busy },
+    { type: 'button', id: 'add', text: add.busy ? '설치 중...' : '추가', disabled: add.busy },
   ],
 })
 
@@ -56,8 +50,7 @@ export function installedPluginsPage(installed: InstalledPlugins, add: AddState)
         title: '플러그인 추가',
         description: '운영 의존 모듈(dependencies)만 npm install한 뒤 설치 목록에 꺼진 상태로 추가합니다.',
         items: [
-          addRow(add, 'path', '경로의 플러그인', '플러그인 폴더의 절대 경로입니다. 그 자리에서 설치하고 그대로 사용합니다.', '/path/to/plugin'),
-          addRow(add, 'archive', '압축 파일의 플러그인', '압축 파일(.tgz 등)의 절대 경로입니다. 플러그인 설치 경로에 풀어서 설치합니다.', '/path/to/plugin.tgz'),
+          addRow(add),
           ...(add.message ? [{ type: 'text', text: add.message, muted: true }] : []),
         ],
       },

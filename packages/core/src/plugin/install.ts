@@ -102,3 +102,11 @@ export async function addFromArchive(config: Config, file: string): Promise<Plug
     fs.rmSync(tmp, { recursive: true, force: true })
   }
 }
+
+/** 입력이 폴더면 그 자리에서, 파일이면 압축 파일로 보고 설치한다. */
+export async function addPlugin(config: Config, p: string): Promise<PluginManifest> {
+  if (!path.isAbsolute(p)) throw new Error('path must be absolute')
+  const stat = fs.statSync(p, { throwIfNoEntry: false })
+  if (!stat) throw new Error(`${p} not found`)
+  return stat.isDirectory() ? addFromPath(config, p) : addFromArchive(config, p)
+}

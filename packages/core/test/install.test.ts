@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { addFromArchive, addFromPath } from "../src/plugin/install.ts";
+import { addFromArchive, addFromPath, addPlugin } from "../src/plugin/install.ts";
 import { loadInstalled } from "../src/plugin/registry.ts";
 
 const home = fs.mkdtempSync(path.join(os.tmpdir(), "rig-install-"));
@@ -67,4 +67,18 @@ test("압축 파일은 설치 경로에 풀리고 설치 목록에 꺼진 user�
   await expect(addFromArchive(config, tgz)).rejects.toThrow("already installed");
   expect(fs.existsSync(path.join(home, "plugins", "node_modules", "by-archive"))).toBe(true); // 실패해도 기존 폴더는 그대로
   await expect(addFromArchive(config, path.join(home, "none.tgz"))).rejects.toThrow("not found");
+});
+
+test("addPlugin은 폴더면 그 자리에서, 파일이면 압축 파일로 설치한다", async () => {
+  const dir = makePlugin("any-dir");
+  expect((await addPlugin(config, dir)).id).toBe("any-dir");
+  expect(loadInstalled(config)).toContainEqual({ id: "any-dir", source: "custom", enabled: false, path: dir });
+  const stage = fs.mkdtempSync(path.join(home, "stage-any-"));
+  fs.renameSync(makePlugin("any-file"), path.join(stage, "package"));
+  const tgz = path.join(home, "any-file.tgz");
+  execFileSync("tar", ["-czf", tgz, "-C", stage, "package"]);
+  expect((await addPlugin(config, tgz)).id).toBe("any-file");
+  expect(loadInstalled(config)).toContainEqual({ id: "any-file", source: "user", enabled: false });
+  await expect(addPlugin(config, path.join(home, "missing"))).rejects.toThrow("not found");
+  await expect(addPlugin(config, "rel/x")).rejects.toThrow("absolute");
 });

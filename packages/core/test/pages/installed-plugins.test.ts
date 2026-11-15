@@ -16,7 +16,7 @@ fs.writeFileSync(
 );
 
 test("스캔한 플러그인을 row로 보여주고 설치 목록의 활성 여부를 반영한다", () => {
-  const page = installedPluginsPage([{ id: "p1", source: "user", enabled: true }], { busy: false, path: "", archive: "" });
+  const page = installedPluginsPage([{ id: "p1", source: "user", enabled: true }], { busy: false, path: "" });
   expect(page.items[0]).toMatchObject({ type: "button", id: "refresh" });
   const rows = (page.items[2] as any).items;
   const p1 = rows.find((r: any) => r.label === "P1");

@@ -1,5 +1,5 @@
 import type { Config } from '../../config.ts'
-import { addFromArchive, addFromPath } from '../../plugin/install.ts'
+import { addPlugin } from '../../plugin/install.ts'
 import type { PluginLoader } from '../../plugin/loader.ts'
 import { loadInstalled } from '../../plugin/registry.ts'
 import { type AddState, installedPluginsPage } from './page.ts'
@@ -14,7 +14,7 @@ const noTrack = () => () => {} // 코어는 프로세스와 수명이 같아 sha
 export function initInstalledPlugins(loader: PluginLoader, config: Config) {
   loader.shared.set('core', 'dashboard:menu', KEY, { name: 'Installed plugins', page: KEY, order: 100 }, noTrack)
 
-  const add: AddState = { busy: false, path: '', archive: '' }
+  const add: AddState = { busy: false, path: '' }
   const scan = () => loader.shared.set('core', 'dashboard:page', KEY, installedPluginsPage(loadInstalled(config), add), noTrack)
   scan()
 
@@ -24,20 +24,17 @@ export function initInstalledPlugins(loader: PluginLoader, config: Config) {
   // 입력은 바뀔 때마다 값만 기억해 두고, 추가 버튼을 누르면 그 값으로 설치한다.
   // shortcut: 설치는 한 번에 하나만 한다 (진행 중이면 버튼과 입력을 잠근다), 동시 설치가 필요하면 대기열을 둔다.
   on('path', (v) => void (add.path = v))
-  on('archive', (v) => void (add.archive = v))
-  const install = (target: 'path' | 'archive', fn: (config: Config, p: string) => Promise<{ name: string }>) => async () => {
-    if (add.busy || !add[target]) return
+  on('add', async () => {
+    if (add.busy || !add.path) return
     Object.assign(add, { busy: true, message: undefined, error: undefined })
     scan()
     try {
-      const m = await fn(config, add[target])
-      Object.assign(add, { [target]: '', message: `${m.name}을(를) 추가했습니다 (꺼진 상태).` })
+      const m = await addPlugin(config, add.path)
+      Object.assign(add, { path: '', message: `${m.name}을(를) 추가했습니다 (꺼진 상태).` })
     } catch (e) {
-      add.error = { target, text: e instanceof Error ? e.message : String(e) }
+      add.error = e instanceof Error ? e.message : String(e)
     }
     add.busy = false
     scan()
-  }
-  on('add-path', install('path', addFromPath))
-  on('add-archive', install('archive', addFromArchive))
+  })
 }
