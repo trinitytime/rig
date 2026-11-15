@@ -75,6 +75,8 @@ const Item = ({ it: raw, k }: { it: unknown; k: string }) => {
           ))}
         </Panel>
       )
+    case 'row':
+      return <RowItem it={it} k={k} kids={arr(it.items).map((c, i) => [obj(c), `${k}.${i}`])} />
     default:
       return CONTROLS[str(it.type)] ? <RowItem it={it} k={k} kids={[[it, k]]} /> : null
   }
