@@ -1,7 +1,7 @@
 import { discoverPlugins, type DiscoveredPlugin } from './discovery.ts'
 import type { InstalledPlugins } from './registry.ts'
 
-// shortcut: 시작할 때 한 번 스캔한 스냅샷이다 (설치, 삭제, 켜고 끄기가 반영되지 않고 토글은 읽기 전용), 변경을 다룰 때 신호를 받아 다시 만든다.
+// shortcut: 시작할 때와 새로고침 버튼을 누를 때만 스캔한 스냅샷이다 (설치 목록 파일의 활성 여부를 읽고, 토글은 읽기 전용), 변경을 다룰 때 신호를 받아 다시 만든다.
 
 const authorName = (a: DiscoveredPlugin['manifest']['author']) => (typeof a === 'string' ? a : a?.name)
 
@@ -24,6 +24,7 @@ export function installedPluginsPage(installed: InstalledPlugins) {
     description: '설치된 플러그인 목록입니다.',
     status: { text: `${on}/${plugins.length} 활성`, tone: 'success' },
     items: [
+      { type: 'button', id: 'refresh', text: '새로고침' }, // 누르면 코어가 다시 스캔한다 (main.ts)
       {
         type: 'section',
         title: '설치된 플러그인',

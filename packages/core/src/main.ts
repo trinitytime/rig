@@ -32,8 +32,11 @@ function init(loader: PluginLoader, config: Config, getServer: () => Server | un
   const port = resolvePort(undefined, config.port)
   loader.shared.set('core', 'http', 'host', host, () => () => {})
   loader.shared.set('core', 'http', 'port', port, () => () => {})
-  // 설치된 플러그인을 스캔해 대시보드의 'installed-plugins' 화면으로 알린다.
-  loader.shared.set('core', 'dashboard:page', 'installed-plugins', installedPluginsPage(loadInstalled(config)), () => () => {})
+  // 설치된 플러그인을 스캔해 대시보드의 'installed-plugins' 화면으로 알린다. 화면의 새로고침 버튼을 누르면 다시 스캔한다.
+  const scan = () =>
+    loader.shared.set('core', 'dashboard:page', 'installed-plugins', installedPluginsPage(loadInstalled(config)), () => () => {})
+  scan()
+  loader.signals.on('dashboard:installed-plugins:refresh', scan, console)
   return { host, port }
 }
 
