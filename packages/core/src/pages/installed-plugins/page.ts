@@ -20,13 +20,13 @@ export type AddState = { busy: boolean; path: string; message?: string; error?: 
 const addRow = (add: AddState) => ({
   type: 'row',
   label: '플러그인 경로',
-  description: '플러그인 폴더나 압축 파일(.tgz 등)의 절대 경로입니다. 폴더는 그 자리에서 설치하고, 압축 파일은 플러그인 설치 경로에 풀어서 설치합니다.',
+  description: '플러그인 폴더나 압축 파일(.tgz 등)의 절대 경로입니다.',
   items: [
     {
       type: 'input',
       id: 'path',
       value: add.path,
-      placeholder: '/path/to/plugin 또는 /path/to/plugin.tgz',
+      placeholder: '/path/to/plugin',
       disabled: add.busy,
       ...(add.error ? { error: add.error } : {}),
     },
@@ -49,10 +49,7 @@ export function installedPluginsPage(installed: InstalledPlugins, add: AddState)
         type: 'section',
         title: '플러그인 추가',
         description: '운영 의존 모듈(dependencies)만 npm install한 뒤 설치 목록에 꺼진 상태로 추가합니다.',
-        items: [
-          addRow(add),
-          ...(add.message ? [{ type: 'text', text: add.message, muted: true }] : []),
-        ],
+        items: [addRow(add), ...(add.message ? [{ type: 'text', text: add.message, muted: true }] : [])],
       },
       {
         type: 'section',

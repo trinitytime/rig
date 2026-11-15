@@ -1,24 +1,15 @@
-import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import type { Config } from '../config.ts'
 import { rigHome } from '../paths.ts'
 import { discoverPlugins } from './discovery.ts'
+import { extract } from './extract.ts'
 import { parseManifest, type PluginManifest } from './manifest.ts'
 import { addInstalled, loadInstalled } from './registry.ts'
+import { run } from './run.ts'
 
 // shortcut: 설치 중 진행 상황과 취소는 없다, 오래 걸리는 설치가 많아지면 로그를 흘리거나 중단 신호를 받는다.
-
-const run = (cmd: string, args: string[], cwd: string) =>
-  new Promise<void>((resolve, reject) => {
-    // Windows의 npm은 npm.cmd라 shell이 필요하다 (인자는 고정값이라 안전하다).
-    const p = spawn(cmd, args, { cwd, stdio: ['ignore', 'ignore', 'pipe'], shell: cmd === 'npm' && process.platform === 'win32' })
-    let err = ''
-    p.stderr.on('data', (d) => (err += d))
-    p.on('error', reject)
-    p.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args[0]} failed: ${err.trim().slice(-500)}`))))
-  })
 
 /**
  * 운영 의존 모듈(dependencies, optionalDependencies)만 설치한다.
@@ -76,7 +67,6 @@ function packageRoot(dir: string): string {
 }
 
 /** 압축 파일을 플러그인 설치 경로(<RIG_HOME>/plugins/node_modules/<id>)에 풀고 운영 의존 모듈을 설치해 설치 목록에 (꺼진 상태로) 추가한다. */
-// shortcut: tar로 풀어서 .zip은 bsdtar가 있는 Windows와 macOS에서만 된다, 필요하면 zip 라이브러리를 쓴다.
 export async function addFromArchive(config: Config, file: string): Promise<PluginManifest> {
   if (!path.isAbsolute(file) || !fs.statSync(file, { throwIfNoEntry: false })?.isFile()) throw new Error('archive file not found')
   const plugins = path.join(rigHome(), 'plugins')
@@ -84,7 +74,7 @@ export async function addFromArchive(config: Config, file: string): Promise<Plug
   const tmp = fs.mkdtempSync(path.join(plugins, '.extract-')) // node_modules 밖이라 탐색에 잡히지 않고, 같은 볼륨이라 rename이 된다
   let dest: string | undefined
   try {
-    await run('tar', ['-xf', file, '-C', tmp], tmp)
+    await extract(file, tmp)
     const root = packageRoot(tmp)
     const m = readPlugin(root)
     assertNew(m.id, config)
