@@ -1,5 +1,6 @@
 import { type Config, readConfig } from './config.ts'
-import { installedPluginsPage } from './plugin/installed-page.ts'
+import { addFromArchive, addFromPath } from './plugin/install.ts'
+import { type AddState, installedPluginsPage } from './plugin/installed-page.ts'
 import { PluginLoader } from './plugin/loader.ts'
 import { loadInstalled } from './plugin/registry.ts'
 import { DEFAULT_HOST, resolvePort, startServer } from './server.ts'
@@ -35,10 +36,32 @@ function init(loader: PluginLoader, config: Config, getServer: () => Server | un
   // 대시보드 사이드바에서 installed-plugins 화면으로 가는 메뉴 (메뉴와 화면은 독립이다).
   loader.shared.set('core', 'dashboard:menu', 'installed-plugins', { name: 'Installed plugins', page: 'installed-plugins', order: 100 }, () => () => {})
   // 설치된 플러그인을 스캔해 대시보드의 'installed-plugins' 화면으로 알린다. 화면의 새로고침 버튼을 누르면 다시 스캔한다.
+  const add: AddState = { busy: false, path: '', archive: '' }
   const scan = () =>
-    loader.shared.set('core', 'dashboard:page', 'installed-plugins', installedPluginsPage(loadInstalled(config)), () => () => {})
+    loader.shared.set('core', 'dashboard:page', 'installed-plugins', installedPluginsPage(loadInstalled(config), add), () => () => {})
   scan()
-  loader.signals.on('core:installed-plugins:refresh', scan, console)
+  const on = (name: string, fn: (value: string) => void | Promise<void>) =>
+    loader.signals.on(`core:installed-plugins:${name}`, (p) => fn(String((p as { value?: unknown })?.value ?? '').trim()), console)
+  on('refresh', scan)
+  // 입력은 바뀔 때마다 값만 기억해 두고, 추가 버튼을 누르면 그 값으로 설치한다.
+  // shortcut: 설치는 한 번에 하나만 한다 (진행 중이면 버튼과 입력을 잠근다), 동시 설치가 필요하면 대기열을 둔다.
+  on('path', (v) => void (add.path = v))
+  on('archive', (v) => void (add.archive = v))
+  const install = (target: 'path' | 'archive', fn: (config: Config, p: string) => Promise<{ name: string }>) => async () => {
+    if (add.busy || !add[target]) return
+    Object.assign(add, { busy: true, message: undefined, error: undefined })
+    scan()
+    try {
+      const m = await fn(config, add[target])
+      Object.assign(add, { [target]: '', message: `${m.name}을(를) 추가했습니다 (꺼진 상태).` })
+    } catch (e) {
+      add.error = { target, text: e instanceof Error ? e.message : String(e) }
+    }
+    add.busy = false
+    scan()
+  }
+  on('add-path', install('path', addFromPath))
+  on('add-archive', install('archive', addFromArchive))
   return { host, port }
 }
 
