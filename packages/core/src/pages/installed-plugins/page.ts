@@ -1,5 +1,5 @@
-import { discoverPlugins, type DiscoveredPlugin } from './discovery.ts'
-import type { InstalledPlugins } from './registry.ts'
+import { discoverPlugins, type DiscoveredPlugin } from '../../plugin/discovery.ts'
+import type { InstalledPlugins } from '../../plugin/registry.ts'
 
 // shortcut: 시작할 때와 새로고침 버튼을 누를 때만 스캔한 스냅샷이다 (설치 목록 파일의 활성 여부를 읽고, 토글은 읽기 전용), 변경을 다룰 때 신호를 받아 다시 만든다.
 

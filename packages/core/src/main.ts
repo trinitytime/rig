@@ -1,6 +1,6 @@
 import { type Config, readConfig } from './config.ts'
 import { addFromArchive, addFromPath } from './plugin/install.ts'
-import { type AddState, installedPluginsPage } from './plugin/installed-page.ts'
+import { type AddState, installedPluginsPage } from './pages/installed-plugins/page.ts'
 import { PluginLoader } from './plugin/loader.ts'
 import { loadInstalled } from './plugin/registry.ts'
 import { DEFAULT_HOST, resolvePort, startServer } from './server.ts'
