@@ -53,3 +53,12 @@ export function loadInstalled(config: Config): InstalledPlugins {
   fs.writeFileSync(file, JSON.stringify(list, null, 2))
   return list
 }
+
+/** 설치 목록 끝에 한 건을 더해 저장한다. 같은 id가 이미 있으면 던진다. */
+export function addInstalled(config: Config, entry: InstalledPlugin): InstalledPlugins {
+  const list = loadInstalled(config)
+  if (list.some((i) => i.id === entry.id)) throw new Error(`plugin "${entry.id}" is already installed`)
+  const next = [...list, entry]
+  fs.writeFileSync(installedFile(), JSON.stringify(next, null, 2))
+  return next
+}
