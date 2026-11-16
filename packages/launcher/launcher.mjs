@@ -6,8 +6,15 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-// .bin/bun.cmd 대신 실제 실행 파일을 쓴다: Windows에서 .cmd를 shell 없이 spawn하면 EINVAL이다 (모든 플랫폼에서 bun 패키지의 bin/bun.exe가 실제 바이너리다).
-const bunBin = join(root, "node_modules", "bun", "bin", "bun.exe");
+// .bin/bun.cmd 대신 실제 실행 파일을 쓴다: Windows에서 .cmd를 shell 없이 spawn하면 EINVAL이다.
+// 실제 바이너리는 두 곳 중 하나에 있다: 설치 직후에는 플랫폼 패키지(@oven/bun-<os>-<cpu>)에, bun의 postinstall이 돈 뒤에는 bun/bin/bun.exe로 옮겨져 있다.
+// ignore-scripts=true라 postinstall은 돌지 않으므로 설치 직후의 바이너리를 바로 쓴다 (bun/bin/bun.exe는 수 KB짜리 자리표시자로 남는다).
+const bunPackage = `bun-${{ win32: "windows", darwin: "darwin", linux: "linux" }[process.platform]}-${{ x64: "x64", arm64: "aarch64" }[process.arch]}`;
+const bunCandidates = [
+  join(root, "node_modules", "@oven", bunPackage, "bin", process.platform === "win32" ? "bun.exe" : "bun"),
+  join(root, "node_modules", "bun", "bin", "bun.exe"),
+];
+const findBun = () => bunCandidates.find((f) => existsSync(f) && statSync(f).size >= 1_000_000); // 자리표시자(수 KB)는 제외
 
 function run(cmd, args) {
   // Windows에서는 npm이 .cmd라서 npm만 shell이 필요하다 (경로에 공백이 있는 node는 shell을 거치면 깨진다).
@@ -45,12 +52,12 @@ async function checkRunning() {
 const port = await checkRunning();
 
 if (!existsSync(join(root, "node_modules"))) run("npm", ["install"]);
-// ignore-scripts=true라 npm install만으로는 bin/bun.exe가 자리표시자(수 KB)로 남는다. 그대로 실행하면 Windows에서 spawn UNKNOWN이 되므로,
-// 진짜 바이너리가 아니면 bun의 postinstall만 직접 실행한다 (node_modules가 이미 있어도 확인한다).
-const isPlaceholder = () => !existsSync(bunBin) || statSync(bunBin).size < 1_000_000;
-if (isPlaceholder()) {
+// shortcut: 두 곳 모두 진짜 바이너리가 없으면 bun의 postinstall(install.js)을 직접 돌린다 (Windows에서 이 단계가 실패한 적이 있다), 그 환경이 확인되면 원인을 고친다.
+let bunBin = findBun();
+if (!bunBin) {
   run(process.execPath, [join(root, "node_modules", "bun", "install.js")]);
-  if (isPlaceholder()) {
+  bunBin = findBun();
+  if (!bunBin) {
     console.error("bun 바이너리를 준비하지 못했습니다. 네트워크를 확인하고 다시 실행하세요.");
     process.exit(1);
   }
