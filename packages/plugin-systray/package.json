@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Rig plugin: system tray menu built from the shared \"tray\" space (systray)",
   "type": "module",
+  "scripts": {
+    "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/systray --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions"
+  },
   "engines": {
     "node": ">=22.18"
   },
