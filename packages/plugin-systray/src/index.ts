@@ -5,6 +5,7 @@ import type { PluginContext, RigPlugin } from '@rig/core'
 import { z } from 'zod'
 import * as mod from 'systray2'
 import type SysTrayType from 'systray2'
+import { delayFirstWrite } from './delay.ts'
 import type { TrayItem } from './types.ts'
 import type { MenuItem } from 'systray2'
 
@@ -17,6 +18,9 @@ const SETTLE_MS = 1000
 
 // 이웃한 항목의 order 차이가 이 값 이상이면 그 사이에 구분선을 넣는다.
 const SEPARATOR_GAP = 100
+
+// Windows의 트레이 바이너리가 초기화를 마칠 때까지 첫 메뉴 전송을 늦추는 시간 (delay.ts).
+const FIRST_MENU_DELAY_MS = 300
 
 const trayItem = z.object({ id: z.string(), name: z.string(), signal: z.string(), order: z.number() }) satisfies z.ZodType<TrayItem>
 
@@ -60,6 +64,7 @@ const build = async (ctx: PluginContext, signals: Map<MenuItem, string>) => {
 
 const start = async (ctx: PluginContext, menu: Awaited<ReturnType<typeof build>>, signals: Map<MenuItem, string>) => {
   const tray = new SysTray({ menu })
+  delayFirstWrite(tray as unknown as Parameters<typeof delayFirstWrite>[0], FIRST_MENU_DELAY_MS) // 바이너리가 뜨기 전(생성 직후)에 바꿔 둔다
   await tray.ready() // 프로세스가 뜬 뒤에야 이벤트를 붙일 수 있다.
   tray.onError((e) => ctx.log.error('systray failed:', e))
   void tray.onClick(({ item }) => {
