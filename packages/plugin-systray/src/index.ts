@@ -31,7 +31,7 @@ const trayIcons = {
   linux: 'linux/rig-tray-22.png',
 } as Record<string, string>
 const iconFile = trayIcons[process.platform] ?? trayIcons.linux!
-const icon = readFileSync(join(import.meta.dirname, '../../../assets/rig-icons/tray', iconFile)).toString('base64')
+const icon = readFileSync(join(import.meta.dirname, '../assets', iconFile)).toString('base64')
 
 // systray2의 chmod('+x')가 실패해도 조용히 넘어가(특히 Bun) 실행 권한 없이 spawn되므로 직접 준다.
 const allowExec = () => {
