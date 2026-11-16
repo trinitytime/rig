@@ -1,5 +1,6 @@
 /** @jsxImportSource hono/jsx */
 import { z } from 'zod'
+import type { DashboardMenuItem } from '../../types.ts'
 import { obj, str, type Obj } from '../util.ts'
 
 export type PageEntry = { key: string; title: string }
@@ -12,7 +13,7 @@ export function pageList(space: Obj): PageEntry[] {
     .sort((a, b) => a.title.localeCompare(b.title))
 }
 
-const menuItem = z.object({ name: z.string().min(1), page: z.string().min(1), order: z.number().optional() })
+const menuItem = z.object({ name: z.string().min(1), page: z.string().min(1), order: z.number().optional() }) satisfies z.ZodType<DashboardMenuItem>
 export type MenuEntry = z.infer<typeof menuItem>
 
 /** shared "dashboard:menu" 공간에서 사이드바 메뉴를 뽑는다 ({ name, page, order? }). 화면(dashboard:page)과는 독립이라 없는 화면을 가리켜도 그대로 둔다. */

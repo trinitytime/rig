@@ -5,6 +5,7 @@ import type { PluginContext, RigPlugin } from '@rig/core'
 import { z } from 'zod'
 import * as mod from 'systray2'
 import type SysTrayType from 'systray2'
+import type { TrayItem } from './types.ts'
 import type { MenuItem } from 'systray2'
 
 // systray2는 CJS라 ESM에서는 default가 한 겹 더 감싸질 수 있다.
@@ -17,7 +18,7 @@ const SETTLE_MS = 1000
 // 이웃한 항목의 order 차이가 이 값 이상이면 그 사이에 구분선을 넣는다.
 const SEPARATOR_GAP = 100
 
-const trayItem = z.object({ id: z.string(), name: z.string(), signal: z.string(), order: z.number() })
+const trayItem = z.object({ id: z.string(), name: z.string(), signal: z.string(), order: z.number() }) satisfies z.ZodType<TrayItem>
 
 // shortcut: Windows는 어두운 작업 표시줄용(dark) 아이콘만 쓴다, 테마 감지가 필요하면 light.ico와 전환.
 const trayIcons = {
@@ -102,6 +103,6 @@ const plugin: RigPlugin = async (ctx) => {
   }
 }
 
-export type TrayItem = z.infer<typeof trayItem>
+export type { TrayItem }
 
 export default plugin

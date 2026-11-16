@@ -1,3 +1,5 @@
+import type { DashboardPage } from './types.ts'
+
 // 플러그인 목록 화면 (shared "dashboard:page/plugins"에 쓴다). 지금은 더미 데이터다.
 // shortcut: 데이터가 고정된 더미다, 실제 목록은 코어의 /api/plugins 같은 출처에서 읽어 만든다.
 const plugins = [
@@ -8,7 +10,7 @@ const plugins = [
 ]
 
 // 토글을 바꾸면 `dashboard:plugins:toggle-<id>` 신호({ value })가, 삭제를 누르면 `dashboard:plugins:remove-<id>` 신호가 나간다. 켜져 있는 플러그인은 삭제할 수 없다.
-export const pluginsPage = {
+export const pluginsPage: DashboardPage = {
   title: 'Plugins',
   description: '설치된 플러그인을 켜고 끕니다.',
   status: { text: `${plugins.filter((p) => p.active).length}/${plugins.length} 활성`, tone: 'success' },
