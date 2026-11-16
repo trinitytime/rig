@@ -1,20 +1,17 @@
 #!/usr/bin/env node
 // 외부 의존성 없는 런처: node_modules가 없으면 npm install(workspaces: packages/* 전체) 후 node_modules에 설치된 bun으로 core를 구동한다.
-import { existsSync, statSync } from "node:fs";
+import { copyFileSync, existsSync, statSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-// .bin/bun.cmd 대신 실제 실행 파일을 쓴다: Windows에서 .cmd를 shell 없이 spawn하면 EINVAL이다.
-// 실제 바이너리는 두 곳 중 하나에 있다: 설치 직후에는 플랫폼 패키지(@oven/bun-<os>-<cpu>)에, bun의 postinstall이 돈 뒤에는 bun/bin/bun.exe로 옮겨져 있다.
-// ignore-scripts=true라 postinstall은 돌지 않으므로 설치 직후의 바이너리를 바로 쓴다 (bun/bin/bun.exe는 수 KB짜리 자리표시자로 남는다).
+// .bin/bun.cmd 대신 실제 실행 파일을 쓴다: Windows에서 .cmd를 shell 없이 spawn하면 EINVAL이다 (모든 플랫폼에서 bun 패키지의 bin/bun.exe가 실제 바이너리다).
+// `npm run dev`의 bun도 이 파일을 거치므로 자리표시자가 아닌 진짜 바이너리여야 한다.
+const bunBin = join(root, "node_modules", "bun", "bin", "bun.exe");
+// 설치 직후 진짜 바이너리는 플랫폼 패키지(@oven/bun-<os>-<cpu>)에 있다. postinstall이 이를 bunBin으로 옮긴다.
 const bunPackage = `bun-${{ win32: "windows", darwin: "darwin", linux: "linux" }[process.platform]}-${{ x64: "x64", arm64: "aarch64" }[process.arch]}`;
-const bunCandidates = [
-  join(root, "node_modules", "@oven", bunPackage, "bin", process.platform === "win32" ? "bun.exe" : "bun"),
-  join(root, "node_modules", "bun", "bin", "bun.exe"),
-];
-const findBun = () => bunCandidates.find((f) => existsSync(f) && statSync(f).size >= 1_000_000); // 자리표시자(수 KB)는 제외
+const bunSource = join(root, "node_modules", "@oven", bunPackage, "bin", process.platform === "win32" ? "bun.exe" : "bun");
 
 function run(cmd, args) {
   // Windows에서는 npm이 .cmd라서 npm만 shell이 필요하다 (경로에 공백이 있는 node는 shell을 거치면 깨진다).
@@ -52,14 +49,26 @@ async function checkRunning() {
 const port = await checkRunning();
 
 if (!existsSync(join(root, "node_modules"))) run("npm", ["install"]);
-// shortcut: 두 곳 모두 진짜 바이너리가 없으면 bun의 postinstall(install.js)을 직접 돌린다 (Windows에서 이 단계가 실패한 적이 있다), 그 환경이 확인되면 원인을 고친다.
-let bunBin = findBun();
-if (!bunBin) {
-  run(process.execPath, [join(root, "node_modules", "bun", "install.js")]);
-  bunBin = findBun();
-  if (!bunBin) {
-    console.error("bun 바이너리를 준비하지 못했습니다. 네트워크를 확인하고 다시 실행하세요.");
-    process.exit(1);
+// ignore-scripts=true라 npm install만으로는 bin/bun.exe가 자리표시자(수 KB)로 남는다. 그대로 실행하면 Windows에서 spawn UNKNOWN이 되므로,
+// 진짜 바이너리가 아니면 bun의 postinstall만 직접 실행한다 (node_modules가 이미 있어도 확인한다).
+const isPlaceholder = () => !existsSync(bunBin) || statSync(bunBin).size < 1_000_000;
+if (isPlaceholder()) {
+  // postinstall은 바이너리를 옮기고 링크하는데 Windows에서 예외로 끝나는 경우가 있어서, 실패하면 플랫폼 패키지의 바이너리를 직접 복사한다.
+  const r = spawnSync(process.execPath, [join(root, "node_modules", "bun", "install.js")], { cwd: root, stdio: "inherit" });
+  if (isPlaceholder()) {
+    console.error(`bun의 install.js가 바이너리를 준비하지 못했습니다 (${r.error?.message ?? `code ${r.status}`}). ${bunSource}를 직접 복사합니다.`);
+    try {
+      copyFileSync(bunSource, bunBin);
+    } catch (e) {
+      console.error(`복사하지 못했습니다: ${e.message}`);
+    }
+    try {
+      copyFileSync(bunSource, join(dirname(bunBin), "bunx.exe")); // bunx도 같은 바이너리다. 없어도 bun은 동작하므로 실패는 무시한다.
+    } catch {}
+    if (isPlaceholder()) {
+      console.error("bun 바이너리를 준비하지 못했습니다. 네트워크를 확인하고 다시 실행하세요.");
+      process.exit(1);
+    }
   }
 }
 
