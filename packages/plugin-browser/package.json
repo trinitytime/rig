@@ -17,5 +17,8 @@
     "displayName": "browser",
     "entry": "src/index.ts",
     "requires": []
+  },
+  "scripts": {
+    "bundle": "bun build --target bun --packages external --outdir dist src/index.ts"
   }
 }

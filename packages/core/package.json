@@ -13,7 +13,8 @@
     "build:type": "tsc --ignoreConfig src/plugin/plugin.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/core --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
     "typecheck": "tsc -b",
     "clean": "rm -rf ../../dist/core ../../dist/types",
-    "start": "node ../../dist/core/main.js"
+    "start": "node ../../dist/core/main.js",
+    "bundle": "bun build --target bun --packages external --outdir dist src/main.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.6",

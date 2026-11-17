@@ -4,7 +4,8 @@
   "description": "Rig plugin: renders declarative plugin UI pages from the shared \"ui\" space (dashboard)",
   "type": "module",
   "scripts": {
-    "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/dashboard --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions"
+    "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/dashboard --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
+    "bundle": "bun build --target bun --packages external --outdir dist src/index.ts && node --input-type=module -e \"import{cpSync}from'node:fs';for(const f of['rig-ui.css','client.js'])cpSync('src/'+f,'dist/'+f)\""
   },
   "engines": {
     "node": ">=22.18"

@@ -23,8 +23,8 @@ npm workspaces 기반이며, 새 패키지는 `packages/` 아래에 추가하면
 
 ## 빌드 산출물
 
-`core`(`tsc -b`)의 빌드 결과는 저장소 루트 `dist/core/`에 생성되고, `npm run bundle`은 단일 파일 `dist/rig.js`를 만듭니다.
-플러그인은 빌드하지 않고 소스(`.ts`)를 그대로 실행합니다. `npm run typecheck`는 `core`와 플러그인(`tsconfig.plugins.json`)의 타입만 검사합니다.
+`core`(`tsc -b`)의 빌드 결과는 저장소 루트 `dist/core/`에 생성됩니다.
+`npm run bundle`은 코어와 각 플러그인을 bun으로 번들해 각 패키지의 `dist/`에 냅니다(`dependencies`는 번들에 넣지 않고 import로 남깁니다). 플러그인은 매니페스트의 `entry`가 아직 소스(`.ts`)를 가리키므로 그대로 소스를 실행합니다. `npm run typecheck`는 `core`와 플러그인(`tsconfig.plugins.json`)의 타입만 검사합니다.
 
 ## 플러그인 매니페스트
 
