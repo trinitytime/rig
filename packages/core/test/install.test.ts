@@ -25,8 +25,8 @@ function makePlugin(id: string) {
       name: id,
       version: "1.0.0",
       dependencies: { "local-dep": `file:${dep}` },
-      devDependencies: { "@rig/core": "*" },
-      peerDependencies: { "@rig/core": "*" },
+      devDependencies: { "@rig-works/core": "*" },
+      peerDependencies: { "@rig-works/core": "*" },
       rig: { id, displayName: id, entry: "index.ts" },
     }),
   );

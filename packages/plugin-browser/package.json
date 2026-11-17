@@ -1,5 +1,5 @@
 {
-  "name": "@rig/plugin-browser",
+  "name": "@rig-works/plugin-browser",
   "version": "0.0.0",
   "description": "Rig service plugin: hidden-browser automation (browser)",
   "type": "module",
@@ -7,10 +7,10 @@
     "node": ">=22.18"
   },
   "peerDependencies": {
-    "@rig/core": "*"
+    "@rig-works/core": "*"
   },
   "devDependencies": {
-    "@rig/core": "*"
+    "@rig-works/core": "*"
   },
   "rig": {
     "id": "browser",

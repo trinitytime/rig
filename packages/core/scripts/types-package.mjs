@@ -1,5 +1,5 @@
-// 각 패키지의 build:type이 dist/types/<이름>/ 에 낸 .d.ts를 하나의 타입 패키지(@rig/types)로 묶는다: dist/types/package.json을 쓴다.
-// 다른 프로젝트에서는 필요한 모듈만 import하거나 (import type { RigPlugin } from '@rig/types/core'), 전부 한 번에 import한다 (from '@rig/types').
+// 각 패키지의 build:type이 dist/types/<이름>/ 에 낸 .d.ts를 하나의 타입 패키지(@rig-works/types)로 묶는다: dist/types/package.json을 쓴다.
+// 다른 프로젝트에서는 필요한 모듈만 import하거나 (import type { RigPlugin } from '@rig-works/types/core'), 전부 한 번에 import한다 (from '@rig-works/types').
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -19,5 +19,5 @@ for (const [name, file] of Object.entries(entries)) {
 }
 writeFileSync(join(types, 'index.d.ts'), index) // 이름이 겹치면 이 파일에서 오류가 난다
 const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
-const pkg = { name: '@rig/types', version, description: 'Rig type declarations (core, systray, dashboard)', type: 'module', exports }
+const pkg = { name: '@rig-works/types', version, description: 'Rig type declarations (core, systray, dashboard)', type: 'module', exports }
 writeFileSync(join(types, 'package.json'), JSON.stringify(pkg, null, 2) + '\n')

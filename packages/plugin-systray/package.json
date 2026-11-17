@@ -1,5 +1,5 @@
 {
-  "name": "@rig/plugin-systray",
+  "name": "@rig-works/plugin-systray",
   "version": "0.0.0",
   "description": "Rig plugin: system tray menu built from the shared \"tray\" space (systray)",
   "type": "module",
@@ -14,10 +14,10 @@
     "zod": "^4.6.7"
   },
   "peerDependencies": {
-    "@rig/core": "*"
+    "@rig-works/core": "*"
   },
   "devDependencies": {
-    "@rig/core": "*"
+    "@rig-works/core": "*"
   },
   "rig": {
     "id": "systray",

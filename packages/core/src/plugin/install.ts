@@ -13,7 +13,7 @@ import { run } from './run.ts'
 
 /**
  * 운영 의존 모듈(dependencies, optionalDependencies)만 설치한다.
- * npm은 --omit=dev를 줘도 devDependencies와 peerDependencies(@rig/core 등 게시되지 않은 것)를 해석하다 실패하므로,
+ * npm은 --omit=dev를 줘도 devDependencies와 peerDependencies(@rig-works/core 등 게시되지 않은 것)를 해석하다 실패하므로,
  * 운영 의존성만 적은 임시 package.json으로 설치하고 node_modules만 플러그인 폴더에 복사한다 (플러그인 폴더의 package.json은 건드리지 않는다).
  */
 // shortcut: 의존성의 상대 경로(file:../x)는 임시 폴더 기준이 되어 깨진다, 필요해지면 절대 경로로 바꿔 적는다. node_modules는 복사해서 큰 트리는 느리다.

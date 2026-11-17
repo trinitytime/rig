@@ -3,12 +3,12 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type { RigPlugin } from '@rig/core'
+import type { RigPlugin } from '@rig-works/core'
 import { pageList } from './components/side/Side.tsx'
 import { Shell } from './render.tsx'
 import { pluginsPage } from './plugins-page.ts'
 
-// 타입만 import한다: 플러그인은 런타임에 @rig/core를 import하지 않는다.
+// 타입만 import한다: 플러그인은 런타임에 @rig-works/core를 import하지 않는다.
 // 코어가 접두사를 떼므로 서버는 자기 주소를 모른다. 링크는 코어가 shared "http"에 알린 host/port로 만든다.
 const PATH = '/dashboard/'
 const read = (f: string) => readFileSync(join(import.meta.dirname, f), 'utf8')

@@ -1,7 +1,7 @@
 import { chmodSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
-import type { PluginContext, RigPlugin } from '@rig/core'
+import type { PluginContext, RigPlugin } from '@rig-works/core'
 import { z } from 'zod'
 import * as mod from 'systray2'
 import type SysTrayType from 'systray2'
