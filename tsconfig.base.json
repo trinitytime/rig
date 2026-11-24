@@ -14,6 +14,6 @@
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
     "rewriteRelativeImportExtensions": true,
-    "paths": { "@rig-works/core": ["./packages/core/src/types.ts"] }
+    "paths": { "@rig-works/core": ["./packages/plugin/src/types.ts"] }
   }
 }

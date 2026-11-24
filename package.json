@@ -12,7 +12,7 @@
     "build": "npm run build:type && npm run build:bundle",
     "build:bundle": "npm run build:bundle --workspaces --if-present",
     "build:type": "npm run build:type --workspaces --if-present && bun run scripts/types-package.ts",
-    "typecheck": "tsc -p packages/core --noEmit --composite false --incremental false && tsc -p tsconfig.plugins.json",
+    "typecheck": "tsc -p packages/plugin --noEmit --composite false --incremental false && tsc -p tsconfig.plugins.json",
     "test": "bun test",
     "bundle": "npm run bundle --workspaces --if-present",
     "clean": "rm -rf dist",

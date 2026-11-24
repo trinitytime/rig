@@ -1,5 +1,5 @@
 {
-  "name": "@rig-works/core",
+  "name": "@rig-works/plugin",
   "version": "0.0.0",
   "description": "Rig kernel: plugin lifecycle, RPC/event bus, service registry, localhost server",
   "type": "module",
