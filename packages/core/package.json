@@ -3,21 +3,19 @@
   "version": "0.0.0",
   "description": "Rig kernel: plugin lifecycle, RPC/event bus, service registry, localhost server",
   "type": "module",
-  "types": "../../dist/core/index.d.ts",
   "engines": {
     "node": ">=22.18"
   },
   "scripts": {
     "dev": "bun --no-install --watch run src/main.ts",
     "build": "tsc -b",
-    "build:type": "tsc --ignoreConfig src/plugin/plugin.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/core --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
-    "typecheck": "tsc -b",
-    "clean": "rm -rf ../../dist/core ../../dist/types",
-    "start": "node ../../dist/core/main.js",
-    "bundle": "bun build --target bun --packages external --outdir dist src/main.ts"
+    "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/core --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
+    "build:bundle": "bun run scripts/bundle-package.ts",
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.6",
+    "find-up": "^8.0.0",
     "bun": "^1.4.4",
     "hono": "^4.13.17",
     "zod": "^4.6.7"

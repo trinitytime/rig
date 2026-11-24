@@ -1,7 +1,6 @@
 {
-  "name": "rig-monorepo",
-  "private": true,
-  "version": "0.0.0",
+  "name": "rig-works",
+  "version": "0.1.0",
   "description": "Rig: an empty JS plugin host (kernel + backend/frontend plugins)",
   "workspaces": [
     "packages/*"
@@ -10,9 +9,10 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "build": "tsc -b",
-    "build:type": "npm run build:type --workspaces --if-present && node packages/core/scripts/types-package.mjs",
-    "typecheck": "npm run build:type && tsc -b && tsc -p tsconfig.plugins.json",
+    "build": "npm run build:type && npm run build:bundle",
+    "build:bundle": "npm run build:bundle --workspaces --if-present",
+    "build:type": "npm run build:type --workspaces --if-present && bun run scripts/types-package.ts",
+    "typecheck": "tsc -p packages/core --noEmit --composite false --incremental false && tsc -p tsconfig.plugins.json",
     "test": "bun test",
     "bundle": "npm run bundle --workspaces --if-present",
     "clean": "rm -rf dist",
@@ -22,6 +22,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^24.19.2",
+    "es-toolkit": "^1.53.2",
+    "find-up": "^8.0.0",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "typescript": "^7.0.2"

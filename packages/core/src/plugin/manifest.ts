@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 /** semver.org의 공식 정규식. npm 배포 버전과 같은 규칙이다. */
 const semver =
-  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
 
 /** URL에 그대로 쓰는 플러그인 식별자. 영문자, 숫자, -, _ 만 허용한다. */
 export const pluginIdSchema = z
@@ -28,26 +28,26 @@ const rigSchema = z.object({
   ui: z.object({ entry: z.string(), slot: z.string() }).optional(),
   /** 필요한 플러그인의 id 목록. */
   requires: z.array(pluginIdSchema).optional(),
-});
+})
 
 // shortcut: author/repository는 npm이 허용하는 문자열·객체 형태를 검증 없이 그대로 보관, 화면에 표시할 때 정규화
 const manifestSchema = z.object({
   /** 플러그인 자신의 버전 (semver). 호스트 버전과는 무관하다. */
-  version: z.string().regex(semver, "must be a semver version (e.g. 1.0.0)"),
+  version: z.string().regex(semver, 'must be a semver version (e.g. 1.0.0)'),
   description: z.string().optional(),
   author: z.union([z.string(), z.looseObject({ name: z.string() })]).optional(),
   repository: z.union([z.string(), z.looseObject({ url: z.string() })]).optional(),
   rig: rigSchema,
-});
+})
 
-export type PluginManifest = Omit<z.infer<typeof manifestSchema>, "rig"> &
-  Omit<z.infer<typeof rigSchema>, "displayName"> & { name: string };
+export type PluginManifest = Omit<z.infer<typeof manifestSchema>, 'rig'> &
+  Omit<z.infer<typeof rigSchema>, 'displayName'> & { name: string }
 
 /** package.json 내용을 검증하고 PluginManifest로 변환한다. 잘못되면 Error를 던진다. */
 export function parseManifest(raw: unknown): PluginManifest {
-  const r = manifestSchema.safeParse(raw);
-  if (!r.success) throw new Error(z.prettifyError(r.error));
-  const { rig, ...pkg } = r.data;
-  const { displayName, ...rest } = rig;
-  return { ...pkg, ...rest, name: displayName };
+  const r = manifestSchema.safeParse(raw)
+  if (!r.success) throw new Error(z.prettifyError(r.error))
+  const { rig, ...pkg } = r.data
+  const { displayName, ...rest } = rig
+  return { ...pkg, ...rest, name: displayName }
 }

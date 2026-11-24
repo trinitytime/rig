@@ -19,6 +19,6 @@
     "requires": []
   },
   "scripts": {
-    "bundle": "bun build --target bun --packages external --outdir dist src/index.ts"
+    "bundle": "bun build --target bun --packages external --outdir dist --entry-naming index.js src/index.ts && node ../../scripts/bundle-package.mjs"
   }
 }
