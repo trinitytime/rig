@@ -4,10 +4,10 @@ import path from 'node:path'
 import { findUp } from 'find-up'
 import { omit, merge } from 'es-toolkit'
 
-const baseTsconfig = await findUp('tsconfig.base.json', { cwd: import.meta.dirname }) // 파일 경로를 돌려준다
-if (!baseTsconfig) throw new Error('tsconfig.base.json not found: cannot locate the repository root')
+const monorepoMarker = await findUp('.monorepo', { cwd: import.meta.dirname }) // 파일 경로를 돌려준다
+if (!monorepoMarker) throw new Error('.monorepo not found: cannot locate the repository root')
 
-const root = path.dirname(baseTsconfig)
+const root = path.dirname(monorepoMarker)
 
 const packageJsonPath = await findUp('package.json', { cwd: import.meta.dirname }) // 이 파일 기준 가장 가까운 package.json
 if (!packageJsonPath) throw new Error('package.json not found: cannot locate the package')
