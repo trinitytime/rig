@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "bun --no-install --watch run src/main.ts",
-    "build": "tsc -b",
+    "build": "bun run scripts/bundle-package.ts",
     "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/core --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
     "build:bundle": "bun run scripts/bundle-package.ts",
     "typecheck": "tsc -b"

@@ -9,7 +9,7 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "build": "npm run build:type && npm run build:bundle",
+    "build": "npm run build --workspaces --if-present",
     "build:bundle": "npm run build:bundle --workspaces --if-present",
     "build:type": "npm run build:type --workspaces --if-present && bun run scripts/types-package.ts",
     "typecheck": "tsc -p packages/plugin --noEmit --composite false --incremental false && tsc -p tsconfig.plugins.json",
