@@ -4,8 +4,10 @@
   "description": "Rig plugin: system tray menu built from the shared \"tray\" space (systray)",
   "type": "module",
   "scripts": {
+    "build": "bun run scripts/bundle-package.ts",
     "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/systray --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
-    "build:bundle": "bun run scripts/bundle-package.ts"
+    "build:bundle": "bun run scripts/bundle-package.ts",
+    "typecheck": "tsc -b"
   },
   "engines": {
     "node": ">=22.18"

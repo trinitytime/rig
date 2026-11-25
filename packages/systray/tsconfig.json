@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "noEmit": true },
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "../../dist/systray/tsconfig.tsbuildinfo",
+    "outDir": "../../dist/systray",
+    "rootDir": ".."
+  },
   "include": ["src"]
 }
