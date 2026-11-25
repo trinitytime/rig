@@ -17,10 +17,10 @@
     "zod": "^4.6.7"
   },
   "peerDependencies": {
-    "@rig-works/core": "*"
+    "@rig-works/plugin": "*"
   },
   "devDependencies": {
-    "@rig-works/core": "*"
+    "@rig-works/plugin": "*"
   },
   "rig": {
     "id": "systray",

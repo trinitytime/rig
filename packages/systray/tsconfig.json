@@ -4,7 +4,8 @@
     "composite": true,
     "tsBuildInfoFile": "../../dist/systray/tsconfig.tsbuildinfo",
     "outDir": "../../dist/systray",
-    "rootDir": ".."
+    "rootDir": "src"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [{ "path": "../plugin" }]
 }

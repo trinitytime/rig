@@ -1,7 +1,7 @@
 import { chmodSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
-import type { PluginContext, RigPlugin } from '@rig-works/core'
+import type { PluginContext, RigPlugin } from '@rig-works/plugin'
 import { z } from 'zod'
 import * as mod from 'systray2'
 import type SysTrayType from 'systray2'
@@ -22,7 +22,12 @@ const SEPARATOR_GAP = 100
 // Windows의 트레이 바이너리가 초기화를 마칠 때까지 첫 메뉴 전송을 늦추는 시간 (delay.ts).
 const FIRST_MENU_DELAY_MS = 300
 
-const trayItem = z.object({ id: z.string(), name: z.string(), signal: z.string(), order: z.number() }) satisfies z.ZodType<TrayItem>
+const trayItem = z.object({
+  id: z.string(),
+  name: z.string(),
+  signal: z.string(),
+  order: z.number(),
+}) satisfies z.ZodType<TrayItem>
 
 // shortcut: Windows는 어두운 작업 표시줄용(dark) 아이콘만 쓴다, 테마 감지가 필요하면 light.ico와 전환.
 const trayIcons = {
