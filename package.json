@@ -20,12 +20,14 @@
     "start": "node packages/launcher/launcher.mjs"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.3",
     "@types/bun": "latest",
     "@types/node": "^24.19.2",
     "es-toolkit": "^1.53.2",
     "find-up": "^8.0.0",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
+    "tsdown": "^0.23.7",
     "typescript": "^7.0.2"
   },
   "type": "module"

@@ -3,9 +3,16 @@
   "version": "0.0.0",
   "description": "Rig kernel: plugin lifecycle, RPC/event bus, service registry, localhost server",
   "type": "module",
-  "engines": {
-    "node": ">=22.18"
+  "exports": {
+    ".": {
+      "@org/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "bun --no-install --watch run src/main.ts",
     "build": "bun run scripts/bundle-package.ts",

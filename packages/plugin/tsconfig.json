@@ -2,8 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "tsBuildInfoFile": "../../dist/plugin/tsconfig.tsbuildinfo",
-    "outDir": "../../dist/plugin",
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
+    "outDir": "./dist",
     "rootDir": "src"
   },
   "include": ["src"]
