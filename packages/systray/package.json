@@ -1,5 +1,5 @@
 {
-  "name": "@rig-works/plugin-systray",
+  "name": "@rig-works/systray",
   "version": "0.0.0",
   "description": "Rig plugin: system tray menu built from the shared \"tray\" space (systray)",
   "type": "module",
