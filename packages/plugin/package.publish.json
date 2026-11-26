@@ -5,7 +5,7 @@
       "default": "./index.mjs"
     }
   },
-  "files": null,
+  "files": ["index.mjs", "index.d.mts"],
   "scripts": null,
   "devDependencies": null,
   "rig": {
