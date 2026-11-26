@@ -4,7 +4,7 @@
   "private": true,
   "description": "Rig 패키지 공통 빌드 도구",
   "bin": {
-    "write-publish-package": "./write-publish-package.ts"
+    "write-publish-package": "./src/write-publish-package.ts"
   },
   "type": "module"
 }
