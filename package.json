@@ -2,6 +2,7 @@
   "name": "rig-works",
   "version": "0.1.0",
   "description": "Rig: an empty JS plugin host (kernel + backend/frontend plugins)",
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
@@ -10,25 +11,25 @@
   },
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "build:bundle": "npm run build:bundle --workspaces --if-present",
-    "build:type": "npm run build:type --workspaces --if-present && bun run scripts/types-package.ts",
-    "typecheck": "tsc -p packages/plugin --noEmit --composite false --incremental false && tsc -p tsconfig.plugins.json",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "bun test",
     "bundle": "npm run bundle --workspaces --if-present",
     "clean": "rm -rf dist",
     "dev": "npm run dev -w @rig-works/core",
-    "start": "node packages/launcher/launcher.mjs"
+    "start": "node packages/launcher/launcher.mjs",
+    "outdated": "find . -type f -name 'package.json' -not -path './.git/*' -not -path '*/node_modules/*' -execdir ncu --upgrade \\;"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
     "@types/bun": "latest",
-    "@types/node": "^24.19.2",
+    "npm-check-updates": "^23.1.1",
+    "@types/node": "^26.6.11",
+    "bun": "^1.4.5",
     "es-toolkit": "^1.53.2",
     "find-up": "^8.0.0",
-    "oxfmt": "^0.72.0",
-    "oxlint": "^1.87.0",
+    "oxfmt": "^0.80.0",
+    "oxlint": "^1.95.0",
     "tsdown": "^0.23.7",
     "typescript": "^7.0.2"
-  },
-  "type": "module"
+  }
 }
