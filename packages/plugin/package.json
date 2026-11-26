@@ -2,10 +2,10 @@
   "name": "@rig-works/plugin",
   "version": "0.0.0",
   "description": "Rig kernel: plugin lifecycle, RPC/event bus, service registry, localhost server",
+  "files": [
+    "dist"
+  ],
   "type": "module",
-  "engines": {
-    "node": ">=22.18"
-  },
   "exports": {
     ".": {
       "@org/source": "./src/index.ts",
@@ -13,12 +13,9 @@
       "default": "./dist/index.mjs"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "dev": "bun --no-install --watch run src/main.ts",
-    "build": "tsdown src/index.ts --dts",
+    "build": "tsdown src/index.ts --dts && write-publish-package",
     "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/core --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
     "build:bundle": "bun run scripts/bundle-package.ts",
     "typecheck": "tsc --noEmit"
@@ -30,7 +27,11 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@rig-works/build-tools": "workspace:*",
     "bun": "^1.4.4"
+  },
+  "engines": {
+    "node": ">=22.18"
   },
   "rig": {
     "id": "plugin",
