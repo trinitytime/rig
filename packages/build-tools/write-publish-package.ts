@@ -1,4 +1,5 @@
-// 사용법: bun run scripts/write-publish-package.ts <패키지 경로>
+#!/usr/bin/env bun
+// 사용법: write-publish-package [패키지 경로] (기본값: 현재 디렉터리)
 // <패키지>/package.json 위에 <패키지>/package.publish.json을 덮어써 <패키지>/dist/package.json을 만든다.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
