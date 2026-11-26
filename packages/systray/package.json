@@ -3,28 +3,35 @@
   "version": "0.0.0",
   "description": "Rig plugin: system tray menu built from the shared \"tray\" space (systray)",
   "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "exports": {
+    ".": {
+      "@org/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "bun run scripts/bundle-package.ts",
     "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/systray --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
     "build:bundle": "bun run scripts/bundle-package.ts",
     "typecheck": "tsc -b"
   },
-  "engines": {
-    "node": ">=22.18"
-  },
   "dependencies": {
     "systray2": "^2.1.4",
     "zod": "^4.6.7"
   },
-  "peerDependencies": {
-    "@rig-works/plugin": "*"
-  },
   "devDependencies": {
-    "@rig-works/plugin": "*"
+    "@rig-works/plugin": "workspace:*"
   },
   "rig": {
     "id": "systray",
-    "displayName": "systray",
+    "displayName": "Systray",
     "entry": "src/index.ts",
     "requires": []
   }

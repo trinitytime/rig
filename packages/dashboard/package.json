@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Rig plugin: renders declarative plugin UI pages from the shared \"ui\" space (dashboard)",
   "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/dashboard --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
     "build:bundle": "bun run scripts/bundle-package.ts"

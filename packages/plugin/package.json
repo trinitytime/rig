@@ -3,11 +3,14 @@
   "version": "0.0.0",
   "description": "Rig kernel: plugin lifecycle, RPC/event bus, service registry, localhost server",
   "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
   "exports": {
     ".": {
       "@org/source": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     }
   },
   "files": [
@@ -15,16 +18,24 @@
   ],
   "scripts": {
     "dev": "bun --no-install --watch run src/main.ts",
-    "build": "bun run scripts/bundle-package.ts",
+    "build": "tsdown src/index.ts --dts",
     "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/core --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
     "build:bundle": "bun run scripts/bundle-package.ts",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.6",
     "find-up": "^8.0.0",
-    "bun": "^1.4.4",
     "hono": "^4.13.17",
     "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "bun": "^1.4.4"
+  },
+  "rig": {
+    "id": "plugin",
+    "displayName": "Plugin",
+    "entry": "./dist/index.mjs",
+    "requires": []
   }
 }
