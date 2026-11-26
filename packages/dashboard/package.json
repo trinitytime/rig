@@ -1,5 +1,5 @@
 {
-  "name": "@rig-works/plugin-dashboard",
+  "name": "@rig-works/dashboard",
   "version": "0.0.0",
   "description": "Rig plugin: renders declarative plugin UI pages from the shared \"ui\" space (dashboard)",
   "type": "module",
@@ -7,23 +7,27 @@
     "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/dashboard --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
     "build:bundle": "bun run scripts/bundle-package.ts"
   },
-  "engines": {
-    "node": ">=22.18"
+  "exports": {
+    ".": {
+      "@org/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "hono": "^4.13.17",
     "zod": "^4.6.7"
   },
-  "peerDependencies": {
-    "@rig-works/core": "*"
-  },
   "devDependencies": {
-    "@rig-works/core": "*"
+    "@rig-works/core": "workspace:*"
   },
   "rig": {
     "id": "dashboard",
     "displayName": "Dashboard",
-    "entry": "src/index.ts",
+    "entry": "src/index.js",
     "requires": []
   }
 }
