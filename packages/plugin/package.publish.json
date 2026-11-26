@@ -1,0 +1,17 @@
+{
+  "exports": {
+    ".": {
+      "types": "./index.d.mts",
+      "default": "./index.mjs"
+    }
+  },
+  "files": null,
+  "scripts": null,
+  "devDependencies": null,
+  "rig": {
+    "id": "plugin",
+    "displayName": "Plugin",
+    "entry": "./index.mjs",
+    "requires": []
+  }
+}
