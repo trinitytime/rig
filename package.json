@@ -20,13 +20,14 @@
     "outdated": "find . -type f -name 'package.json' -not -path './.git/*' -not -path '*/node_modules/*' -execdir ncu --upgrade \\;"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
     "@types/bun": "latest",
-    "npm-check-updates": "^23.1.1",
     "@types/node": "^26.6.11",
     "bun": "^1.4.5",
     "es-toolkit": "^1.53.2",
     "find-up": "^8.0.0",
+    "npm-check-updates": "^23.1.1",
     "oxfmt": "^0.80.0",
     "oxlint": "^1.95.0",
     "tsdown": "^0.23.7",
