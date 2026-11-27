@@ -2,7 +2,7 @@ import { clean, copy, defineBuild, job, json, on, run, set, workspaceDeps } from
 
 const packageJson = {
   bin: {
-    'rig-build': './cli.mjs',
+    'rig-build': 'cli.mjs',
   },
   exports: {
     '.': {
