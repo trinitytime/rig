@@ -6,33 +6,24 @@
   "engines": {
     "node": ">=22.18"
   },
-  "exports": {
-    ".": {
-      "@org/source": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "bun run scripts/bundle-package.ts",
-    "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/systray --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
-    "build:bundle": "bun run scripts/bundle-package.ts",
-    "typecheck": "tsc -b"
+  "exports": "./src/index.ts",
+   "scripts": {
+    "build": "tsdown src/index.ts --dts && write-publish-package && copy-publish-files",
+    "typecheck": "tsc --noEmit --incremental false"
   },
   "dependencies": {
     "systray2": "^2.1.4",
     "zod": "^4.6.7"
   },
-  "devDependencies": {
+  "peerDependencies": {
+    "@rig-works/build-tools": "workspace:*",
     "@rig-works/plugin": "workspace:*"
   },
+  "files": ["assets"],
   "rig": {
     "id": "systray",
     "displayName": "Systray",
-    "entry": "src/index.ts",
+    "entry": "./src/index.ts",
     "requires": []
   }
 }

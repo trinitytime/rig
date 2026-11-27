@@ -1,11 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "tsBuildInfoFile": "../../dist/systray/tsconfig.tsbuildinfo",
-    "outDir": "../../dist/systray",
+    "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src"],
-  "references": [{ "path": "../plugin" }]
+  "include": ["src"]
 }

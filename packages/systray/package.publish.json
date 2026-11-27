@@ -1,0 +1,17 @@
+{
+  "exports": {
+    ".": {
+      "types": "./index.d.mts",
+      "default": "./index.mjs"
+    }
+  },
+  "files": ["index.mjs", "index.d.mts", "assets"],
+  "scripts": null,
+  "devDependencies": null,
+  "rig": {
+    "id": "systray",
+    "displayName": "Systray",
+    "entry": "./index.mjs",
+    "requires": []
+  }
+}
