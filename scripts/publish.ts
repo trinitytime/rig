@@ -1,5 +1,6 @@
 // 사용법: bun scripts/publish.ts [--dry-run]
-// packages/*/dist(빌드 결과)를 배포한다. 레지스트리에 같은 버전이 이미 있으면 건너뛰고, 의존하는 패키지를 먼저 배포한다.
+// packages/*/dist(빌드 결과)를 스테이징(npm stage publish)한다. 정식 배포는 npmjs.com의 Staged Packages 탭(또는 npm stage approve)에서 2FA로 승인해야 이뤄진다.
+// 레지스트리에 같은 버전이 이미 있으면 건너뛰고, 의존하는 패키지를 먼저 배포한다.
 import { $, Glob } from 'bun'
 
 type Pkg = Record<string, Record<string, string> | string | boolean | undefined>
@@ -43,8 +44,8 @@ for (const { dir, name, version } of sortByDeps(items)) {
     console.log(`skip ${name}@${version} (already published)`)
     continue
   }
-  console.log(`publish ${name}@${version}${dryRun ? ' (dry-run)' : ''}`)
+  console.log(`stage ${name}@${version}${dryRun ? ' (dry-run)' : ''}`)
   const target = `${dir}/dist`
   const flags = dryRun ? ['--dry-run'] : []
-  await $`npm publish ${target} --access public ${flags}` // 실패하면 예외가 나서 멈춘다
+  await $`npm stage publish --access public ${flags}`.cwd(target) // stage publish는 현재 폴더를 올린다. 실패하면 예외가 나서 멈춘다
 }
