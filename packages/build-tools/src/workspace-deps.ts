@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import type { Processor } from './index.ts'
+import type { Processor } from './types.ts'
 
 const DEP_FIELDS = ['dependencies', 'peerDependencies', 'optionalDependencies']
 const WORKSPACE_PREFIX = 'workspace:'

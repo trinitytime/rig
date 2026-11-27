@@ -2,7 +2,7 @@
 // 사용법: rig-build [작업 이름...] (없으면 build.config.ts의 모든 작업을 정의된 순서대로 실행)
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import type { Job } from './index.ts'
+import type { Job } from './types.ts'
 
 try {
   const jobs = (await import(pathToFileURL(path.resolve('build.config.ts')).href)).default as Record<string, Job>
