@@ -1,19 +1,30 @@
 {
   "name": "@rig-works/build-tools",
   "version": "0.0.0",
-  "private": true,
   "description": "Rig 패키지 공통 빌드 도구",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trinitytime/rig.git",
+    "directory": "packages/build-tools"
+  },
   "bin": {
     "copy-publish-files": "./src/copy-publish-files.ts",
-    "rig-build": "./cli.ts",
+    "rig-build": "./src/cli.ts",
     "write-publish-package": "./src/write-publish-package.ts"
   },
   "type": "module",
   "exports": {
     ".": "./index.ts"
   },
+  "scripts": {
+    "build": "rig-build build"
+  },
   "dependencies": {
     "tinyglobby": "^0.2.17",
     "zx": "^8.8.5"
+  },
+  "engines": {
+    "node": ">=22.18"
   }
 }

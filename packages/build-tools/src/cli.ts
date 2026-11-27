@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // 사용법: rig-build [작업 이름...] (없으면 build.config.ts의 모든 작업을 정의된 순서대로 실행)
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
