@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test'
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { clean, copy, job, json, on, run, set } from '../src/index.ts'
+import { clean, copy, job, json, on, run, set, workspaceDeps } from '../src/index.ts'
 
 async function inTempDir(fn: (dir: string) => Promise<void>) {
   const cwd = process.cwd()
@@ -95,4 +95,23 @@ test('clean: outDir을 지우되 없거나 현재 경로 자신·상위·바깥�
     expect(await Bun.file('out/sub/a.txt').exists()).toBe(false)
     expect(await Bun.file('keep.txt').exists()).toBe(true)
     await job([set({ outDir: 'nothing' }), clean()])() // 없는 폴더는 오류 없이 통과
+  }))
+
+test('workspaceDeps: workspace: 항목을 node_modules의 실제 버전 범위로 바꾼다', () =>
+  inTempDir(async (dir) => {
+    await mkdir('node_modules/@x/dep', { recursive: true })
+    await writeFile('node_modules/@x/dep/package.json', '{"version":"1.2.3"}')
+    const pkg = {
+      dependencies: { '@x/dep': 'workspace:*', zod: '^4.0.0' },
+      peerDependencies: { '@x/dep': 'workspace:~' },
+      optionalDependencies: { '@x/dep': 'workspace:^1.0.0' },
+    }
+    await writeFile('package.json', JSON.stringify(pkg))
+    await job([set({ outDir: 'out' }), on('package.json', workspaceDeps())])()
+    const out = JSON.parse(await readFile(path.join(dir, 'out/package.json'), 'utf8'))
+    expect(out.dependencies).toEqual({ '@x/dep': '^1.2.3', zod: '^4.0.0' })
+    expect(out.peerDependencies).toEqual({ '@x/dep': '~1.2.3' })
+    expect(out.optionalDependencies).toEqual({ '@x/dep': '^1.0.0' })
+    await writeFile('package.json', '{"dependencies":{"@x/none":"workspace:*"}}')
+    expect(job([set({ outDir: 'out' }), on('package.json', workspaceDeps())])()).rejects.toThrow('not found')
   }))

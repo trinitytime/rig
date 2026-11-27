@@ -114,6 +114,17 @@ JSON 파일을 읽어 `fn(data, ctx)`가 돌려준 값으로 바꿔 씁니다(2�
 on('package.json', json((pkg, ctx) => ({ ...pkg, scripts: undefined })))
 ```
 
+### `workspaceDeps()`
+
+`package.json`의 `dependencies`, `peerDependencies`, `optionalDependencies`에서 `workspace:` 항목을 실제 버전 범위로 바꿉니다. 배포할 `package.json`에 `workspace:*`가 남아 있으면 설치가 실패하기 때문입니다.
+
+```ts
+on('package.json', [json((pkg) => ({ ...pkg, scripts: null })), workspaceDeps()])
+```
+
+- `workspace:*`와 `workspace:^`는 `^<버전>`, `workspace:~`는 `~<버전>`으로 바꿉니다. `workspace:^1.0.0`처럼 범위를 직접 쓰면 `workspace:`만 뗍니다.
+- 버전은 현재 디렉터리부터 위로 올라가며 찾은 `node_modules/<이름>/package.json`(워크스페이스 링크)에서 읽습니다. 설치가 안 되어 있으면 에러입니다.
+
 ### 직접 만들기
 
 처리는 함수입니다. `(content, file, ctx) => Buffer | { content, file }` 모양이면 됩니다.
