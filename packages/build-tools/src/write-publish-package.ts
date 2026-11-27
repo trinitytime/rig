@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 // 사용법: write-publish-package [패키지 경로] (기본값: 현재 디렉터리)
 // <패키지>/package.json 위에 <패키지>/package.publish.json을 덮어써 <패키지>/dist/package.json을 만든다.
+// <패키지>/package.publish.json이 없으면 package.json을 그대로 dist/package.json으로 쓴다.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -18,7 +19,10 @@ async function readJson(file: string) {
 
 const packageDir = path.resolve(process.argv[2] ?? '.')
 const pkg = await readJson(path.join(packageDir, 'package.json'))
-const overrides = await readJson(path.join(packageDir, 'package.publish.json'))
+const overrides = await readJson(path.join(packageDir, 'package.publish.json')).catch((e) => {
+  if (e.code === 'ENOENT') return {} // 배포용 설정이 없으면 package.json을 그대로 쓴다
+  throw e
+})
 
 const outDir = path.join(packageDir, 'dist')
 await mkdir(outDir, { recursive: true })
