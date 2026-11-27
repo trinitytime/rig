@@ -4,8 +4,12 @@
   "private": true,
   "description": "Rig 패키지 공통 빌드 도구",
   "bin": {
-    "write-publish-package": "./src/write-publish-package.ts",
-    "copy-publish-files": "./src/copy-publish-files.ts"
+    "copy-publish-files": "./src/copy-publish-files.ts",
+    "rig-build": "./cli.ts",
+    "write-publish-package": "./src/write-publish-package.ts"
   },
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  }
 }
