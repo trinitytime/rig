@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type { RigPlugin } from '@rig-works/core'
+import type { RigPlugin } from '@rig-works/plugin'
 import { pageList } from './components/side/Side.tsx'
 import { Shell } from './render.tsx'
 import { pluginsPage } from './plugins-page.ts'
@@ -82,7 +82,8 @@ const plugin: RigPlugin = (ctx) => {
   const page = async (current?: string) => {
     const space = await ctx.shared.get<Record<string, unknown>>('dashboard:page')
     const menu = await ctx.shared.get<Record<string, unknown>>('dashboard:menu')
-    if (current !== undefined && !pageList(space).some((p) => p.key === current)) return new Response('not found', { status: 404 })
+    if (current !== undefined && !pageList(space).some((p) => p.key === current))
+      return new Response('not found', { status: 404 })
     const { host, port } = await ctx.shared.get<{ host?: string; port?: number }>('http')
     const base = host && port ? `http://${host}:${port}${PATH}` : PATH
     return new Response('<!doctype html>' + (await Shell({ base, space, menu, current }).toString()), {

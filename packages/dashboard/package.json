@@ -7,25 +7,21 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "build:type": "tsc --ignoreConfig src/types.ts --declaration --emitDeclarationOnly --outDir ../../dist/types/dashboard --target ES2023 --module NodeNext --skipLibCheck --rewriteRelativeImportExtensions",
-    "build:bundle": "bun run scripts/bundle-package.ts"
+    "build": "tsdown src/index.ts --dts && write-publish-package && copy-publish-files",
+    "typecheck": "tsc --noEmit --incremental false"
   },
-  "exports": {
-    ".": {
-      "@org/source": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
+  "exports": "./src/index.ts",
   "files": [
-    "dist"
+    "src/rig-ui.css",
+    "src/client.js"
   ],
   "dependencies": {
-    "hono": "^4.13.17",
+    "hono": "^4.13.22",
     "zod": "^4.6.7"
   },
-  "devDependencies": {
-    "@rig-works/core": "workspace:*"
+  "peerDependencies": {
+    "@rig-works/plugin": "workspace:*",
+    "@rig-works/build-tools": "workspace:*"
   },
   "rig": {
     "id": "dashboard",

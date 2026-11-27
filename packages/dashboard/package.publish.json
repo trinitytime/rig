@@ -1,0 +1,17 @@
+{
+  "exports": {
+    ".": {
+      "types": "./index.d.mts",
+      "default": "./index.mjs"
+    }
+  },
+  "files": ["index.mjs", "index.d.mts"],
+  "scripts": null,
+  "devDependencies": null,
+  "rig": {
+    "id": "dashboard",
+    "displayName": "Dashboard",
+    "entry": "./index.mjs",
+    "requires": []
+  }
+}
