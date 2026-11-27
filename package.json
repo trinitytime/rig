@@ -10,8 +10,8 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "bun run --filter './packages/*' build",
+    "typecheck": "bun run --filter './packages/*' typecheck",
     "test": "bun test",
     "bundle": "npm run bundle --workspaces --if-present",
     "clean": "rm -rf dist",
@@ -30,6 +30,6 @@
     "oxfmt": "^0.80.0",
     "oxlint": "^1.95.0",
     "tsdown": "^0.23.7",
-    "typescript": "^7.0.2"
+    "typescript": "next"
   }
 }
