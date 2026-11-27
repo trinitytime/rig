@@ -16,8 +16,10 @@
     "zod": "^4.6.7"
   },
   "peerDependencies": {
-    "@rig-works/build-tools": "workspace:*",
     "@rig-works/plugin": "workspace:*"
+  },
+  "devDependencies": {
+    "@rig-works/build-tools": "workspace:*"
   },
   "files": ["assets"],
   "rig": {
