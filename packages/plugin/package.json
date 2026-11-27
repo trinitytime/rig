@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Rig kernel: plugin lifecycle, RPC/event bus, service registry, localhost server",
   "type": "module",
+  "private": true,
   "exports": "./src/index.ts",
   "scripts": {
     "dev": "bun --no-install --watch run src/main.ts",

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Rig plugin: system tray menu built from the shared \"tray\" space (systray)",
   "type": "module",
+  "private": true,
   "engines": {
     "node": ">=22.18"
   },
