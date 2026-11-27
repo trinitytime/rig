@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { Glob } from 'bun'
+import { glob } from 'tinyglobby'
+import { $ } from 'zx'
 
 // shortcut: ctx를 Record<string, unknown>으로만 다룬다(변수 타입 검사 없음), 변수가 늘어 오타가 잦아지면 job 제네릭으로 올린다.
 export type Ctx = Record<string, unknown>
@@ -18,10 +19,16 @@ export function set(vars: Ctx): Task {
   return (ctx) => void Object.assign(ctx, vars)
 }
 
+// shortcut: zx 기본 셸(bash)을 쓴다 — Windows에서 bash가 없으면 $.shell을 바꿔야 한다.
 /** 명령을 실행한다. 종료 코드가 0이 아니면 예외를 던져 작업을 멈춘다. */
 export function run(command: Val<string>): Task {
   return async (ctx) => {
-    const result = await Bun.$`${{ raw: resolveVal(command, ctx) }}`.quiet().nothrow()
+    const result = await $({
+      cwd: process.cwd(),
+      quote: (text) => text,
+      quiet: true,
+      nothrow: true,
+    })`${resolveVal(command, ctx)}`
     process.stdout.write(result.stdout)
     process.stderr.write(result.stderr)
     if (result.exitCode) throw new Error(`command failed (exit ${result.exitCode}): ${resolveVal(command, ctx)}`)
@@ -33,8 +40,7 @@ export function on(patterns: string | string[], processors: Processor | Processo
   return async (ctx) => {
     const outDir = ctx.outDir
     if (typeof outDir !== 'string') throw new Error('on(): outDir is not set, call set({ outDir }) first')
-    const found = await Promise.all([patterns].flat().map((p) => Array.fromAsync(new Glob(p).scan('.'))))
-    const files = found.flat()
+    const files = await glob(patterns)
     if (!files.length) throw new Error(`on(): no files matched ${[patterns].flat().join(', ')}`)
     for (const file of files) {
       let content: Buffer = await readFile(file)
