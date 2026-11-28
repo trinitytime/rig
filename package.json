@@ -2,19 +2,17 @@
   "name": "rig-works",
   "version": "0.1.0",
   "description": "Rig: an empty JS plugin host (kernel + backend/frontend plugins)",
-  "type": "module",
   "workspaces": [
     "packages/*"
   ],
-  "engines": {
-    "node": ">=22.18"
-  },
+  "type": "module",
   "scripts": {
     "build": "bun run --filter './packages/*' build",
     "typecheck": "bun run --filter './packages/*' typecheck",
     "test": "bun test",
     "bundle": "npm run bundle --workspaces --if-present",
     "clean": "rm -rf dist",
+    "release": "changeset version && git add .changeset packages && git commit -m 'chore: 버전 업데이트' && git push",
     "dev": "npm run dev -w @rig-works/core",
     "start": "node packages/launcher/launcher.mjs",
     "outdated": "find . -type f -name 'package.json' -not -path './.git/*' -not -path '*/node_modules/*' -execdir ncu --upgrade \\;"
@@ -31,5 +29,8 @@
     "oxlint": "^1.95.0",
     "tsdown": "^0.23.7",
     "typescript": "next"
+  },
+  "engines": {
+    "node": ">=22.18"
   }
 }
