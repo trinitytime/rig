@@ -1,6 +1,7 @@
 on:
   push:
-    tags: ['package-*']
+    branches: [main]
+    paths: ['packages/*/package.json']
 permissions:
   contents: read
   id-token: write
