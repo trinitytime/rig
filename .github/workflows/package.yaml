@@ -19,3 +19,15 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - run: bun scripts/publish.ts
+  cleanup:
+    needs: publish
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      # shortcut: 최근 100개만 조회해 3개를 넘는 것을 지운다, 이력이 100개를 넘게 쌓이면 limit을 올린다
+      - run: gh run list --workflow package.yaml --limit 100 --json databaseId --jq '.[3:][].databaseId' | xargs -rI{} gh run delete {}
